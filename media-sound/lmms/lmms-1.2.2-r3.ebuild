@@ -21,7 +21,7 @@ S="${WORKDIR}/${PN}"
 LICENSE="GPL-2 LGPL-2"
 SLOT="0"
 
-IUSE="alsa debug fluidsynth jack libgig mp3 ogg portaudio pulseaudio sdl soundio stk test vst"
+IUSE="alsa debug fluidsynth +fltk jack libgig mp3 ogg portaudio pulseaudio sdl soundio stk test vst"
 
 # FAIL!  : AutomatableModelTest::LinkTests() 'm1Changed' returned FALSE. ()
 #
@@ -38,9 +38,9 @@ COMMON_DEPEND="
 	>=media-libs/libsndfile-1.0.11
 	sci-libs/fftw:3.0
 	sys-libs/zlib
-	x11-libs/fltk:1=
 	alsa? ( media-libs/alsa-lib )
 	fluidsynth? ( media-sound/fluidsynth )
+	fltk? ( x11-libs/fltk:1= )
 	jack? ( virtual/jack )
 	libgig? ( media-libs/libgig )
 	mp3? ( media-sound/lame )
@@ -56,10 +56,12 @@ COMMON_DEPEND="
 	)
 	soundio? ( media-libs/libsoundio )
 	stk? ( media-libs/stk )
-	vst? ( virtual/wine )
+	vst? (
+		virtual/wine
+		dev-qt/qtx11extras:5
+	)
 "
 DEPEND="${COMMON_DEPEND}
-	dev-qt/qtx11extras:5
 	test? ( dev-qt/qttest:5 )
 "
 BDEPEND="
