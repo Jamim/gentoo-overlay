@@ -276,6 +276,12 @@ src_prepare() {
 	# Fix docbook2texi command
 	sed -r -i 's/DOCBOOK2X_TEXI[[:space:]]*=[[:space:]]*docbook2x-texi/DOCBOOK2X_TEXI = docbook2texi.pl/' \
 		Documentation/Makefile || die
+
+	# tk apps don't work well with unicode on my machine,
+	# so it's better to remove Russian translation and
+	# allow git gui and gitk to fallback to English locale
+	rm git-gui/po/ru.po || die
+	rm gitk-git/po/ru.po || die
 }
 
 git_emake() {

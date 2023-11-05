@@ -2,8 +2,8 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
   <maintainer type="person">
-    <email>robbat2@gentoo.org</email>
-    <name>Robin H. Johnson</name>
+    <email>aliaksei.urbanski@gmail.com</email>
+    <name>Aliaksei Urbanski</name>
   </maintainer>
   <longdescription lang="en">
     Git - Fast Version Control System. Official titled
