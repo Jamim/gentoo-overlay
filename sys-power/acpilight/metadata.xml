@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-  <!-- maintainer-needed -->
+  <maintainer type="person">
+    <email>aliaksei.urbanski@gmail.com</email>
+    <name>Aliaksei Urbanski</name>
   <upstream>
     <remote-id type="gitlab">wavexx/acpilight</remote-id>
   </upstream>
