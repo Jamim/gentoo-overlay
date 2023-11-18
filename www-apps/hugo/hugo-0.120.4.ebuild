@@ -9,7 +9,7 @@ DESCRIPTION="Fast static HTML and CSS website generator"
 HOMEPAGE="https://gohugo.io https://github.com/gohugoio/hugo"
 SRC_URI="
 	https://github.com/gohugoio/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	https://tastytea.de/files/gentoo/${P}-vendor.tar.xz
+	https://gentoo.aur.im/distfiles/${P}-vendor.tar.xz
 "
 
 # NOTE: To create the vendor tarball, run:
