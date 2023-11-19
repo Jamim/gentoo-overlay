@@ -2,14 +2,20 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
+
 inherit bash-completion-r1 go-module toolchain-funcs
-GIT_COMMIT=08896fd1dc362c097c925146c4a0d0dac715ace0
+
+GIT_COMMIT=8220a6eb95f0a4d75f7f2d7b14cef975f050512d
 GIT_COMMIT_SHORT=${GIT_COMMIT:0:9}
 
 DESCRIPTION="Single Node Kubernetes Cluster"
 HOMEPAGE="https://github.com/kubernetes/minikube https://kubernetes.io"
 
-SRC_URI="https://github.com/zmedico/minikube/archive/refs/tags/v${PV}-vendor.tar.gz -> ${P}-vendor.tar.gz"
+EGO_PN="github.com/kubernetes/${PN}"
+SRC_URI="
+	https://github.com/kubernetes/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
+	https://gentoo.aur.im/distfiles/${P}-vendor.tar.xz
+"
 
 LICENSE="Apache-2.0 BSD BSD-2 CC-BY-4.0 CC-BY-SA-4.0 CC0-1.0 GPL-2 ISC LGPL-3 MIT MPL-2.0 WTFPL-2 ZLIB || ( LGPL-3+ GPL-2 ) || ( Apache-2.0 LGPL-3+ ) || ( Apache-2.0 CC-BY-4.0 )"
 SLOT="0"
@@ -22,7 +28,6 @@ RDEPEND="${COMMON_DEPEND}"
 BDEPEND="dev-go/go-bindata"
 
 RESTRICT="test"
-S=${WORKDIR}/${P}-vendor
 
 src_configure() {
 	case "${ARCH}" in
