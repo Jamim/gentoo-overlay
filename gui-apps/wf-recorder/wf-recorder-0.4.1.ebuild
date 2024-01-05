@@ -18,11 +18,15 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
+IUSE="pulseaudio"
 
 DEPEND="
 	dev-libs/wayland
-	media-libs/libpulse
-	media-video/ffmpeg[pulseaudio,x264]
+	media-video/ffmpeg[x264]
+	pulseaudio? (
+		media-libs/libpulse
+		media-video/ffmpeg[pulseaudio]
+	)
 "
 RDEPEND="${DEPEND}"
 BDEPEND="
@@ -30,3 +34,10 @@ BDEPEND="
 	dev-util/wayland-scanner
 	virtual/pkgconfig
 "
+
+src_configure() {
+	local emesonargs=(
+		$(meson_feature pulseaudio pulse)
+	)
+	meson_src_configure
+}
