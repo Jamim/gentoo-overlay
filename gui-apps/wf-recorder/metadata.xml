@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<!--maintainer-needed-->
-	<upstream>
-		<remote-id type="github">ammen99/wf-recorder</remote-id>
-	</upstream>
+  <maintainer type="person">
+    <email>aliaksei.urbanski@gmail.com</email>
+    <name>Aliaksei Urbanski</name>
+  </maintainer>
+  <upstream>
+    <remote-id type="github">ammen99/wf-recorder</remote-id>
+  </upstream>
 </pkgmetadata>
