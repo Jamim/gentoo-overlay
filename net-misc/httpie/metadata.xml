@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<!-- maintainer-needed -->
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
+	</maintainer>
 	<longdescription lang="en">
 		HTTPie (pronounced aitch-tee-tee-pie) is a command line HTTP
 		client. Its goal is to make CLI interaction with web services as

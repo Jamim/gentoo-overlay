@@ -1,9 +1,9 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{9..12} )
 PYTHON_REQ_USE="ssl(+)"
 DISTUTILS_USE_PEP517=setuptools
 
@@ -11,7 +11,8 @@ inherit bash-completion-r1 distutils-r1
 
 DESCRIPTION="Modern command line HTTP client"
 HOMEPAGE="https://httpie.io/ https://pypi.org/project/httpie/"
-SRC_URI="https://github.com/httpie/httpie/archive/${PV}.tar.gz -> ${P}.gh.tar.gz"
+SRC_URI="https://github.com/httpie/cli/archive/${PV}.tar.gz -> ${P}.gh.tar.gz"
+S="${WORKDIR}/cli-${PV}"
 
 LICENSE="BSD"
 SLOT="0"
