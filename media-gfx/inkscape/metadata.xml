@@ -2,8 +2,8 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>dilfridge@gentoo.org</email>
-		<name>Andreas K. Hüttel</name>
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<use>
 		<flag name="cdr">Enable support for CorelDRAW files via <pkg>media-libs/libcdr</pkg></flag>
