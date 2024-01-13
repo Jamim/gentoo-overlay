@@ -1,13 +1,13 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{10..12} )
 PLOCALES="cs de es fr it ja ka ko nl pl pt pt_BR ru sv th tr zh_CN zh_TW"
 inherit meson plocale python-r1 xdg
 
-DESCRIPTION="A graphical tool to compare and merge text files"
-HOMEPAGE="http://diffuse.sourceforge.net/ https://github.com/MightyCreak/diffuse/"
+DESCRIPTION="A graphical tool for comparing and merging text files"
+HOMEPAGE="https://mightycreak.github.io/diffuse/"
 SRC_URI="https://github.com/MightyCreak/diffuse/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="GPL-2"
