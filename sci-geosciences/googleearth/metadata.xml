@@ -2,10 +2,7 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>martin@mvath.de</email>
-		<name>Martin Väth</name>
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
-	<use>
-		<flag name="bundled-libs">Use bundled libraries.</flag>
-	</use>
 </pkgmetadata>

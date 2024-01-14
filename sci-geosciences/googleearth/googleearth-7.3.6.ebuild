@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Martin V\"ath and others
+# Copyright 1999-2024 Martin V\"ath and others
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -7,7 +7,7 @@ inherit desktop pax-utils unpacker wrapper xdg-utils
 
 DESCRIPTION="A 3D interface to the planet"
 HOMEPAGE="https://www.google.com/earth/desktop/"
-SRC_URI="https://dl.google.com/dl/linux/direct/google-earth-pro-stable_${PV}_amd64.deb -> google-earth-pro-stable_${PV}-r2_amd64.deb"
+SRC_URI="https://dl.google.com/dl/linux/direct/google-earth-pro-stable_${PV}_amd64.deb"
 LICENSE="googleearth GPL-2"
 SLOT="0"
 KEYWORDS="~amd64"
