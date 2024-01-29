@@ -1,0 +1,55 @@
+diff --git a/en_AU.aff b/en_AU.aff
+index d0cccb3..ae57506 100644
+--- a/en_AU.aff	
++++ b/en_AU.aff	
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS 0123456789’
+ 
+ PFX A Y 1
+ PFX A   0     re         .
+diff --git a/en_CA.aff b/en_CA.aff
+index d0cccb3..ae57506 100644
+--- a/en_CA.aff	
++++ b/en_CA.aff	
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS 0123456789’
+ 
+ PFX A Y 1
+ PFX A   0     re         .
+diff --git a/en_US.aff b/en_US.aff
+index d0cccb3..ae57506 100644
+--- a/en_US.aff	
++++ b/en_US.aff	
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS 0123456789’
+ 
+ PFX A Y 1
+ PFX A   0     re         .
+diff --git a/en_ZA.aff b/en_ZA.aff
+index b8f2fb9..50fc895 100644
+--- a/en_ZA.aff	
++++ b/en_ZA.aff	
+@@ -36,6 +36,8 @@ TRY esiaénrtolcdugmfphbyvkw-'.zqjxSNRTLCGDMFPHBEAUYOIVKWóöâôZQJXÅçèîê
+ ICONV 1
+ ICONV ’ '
+ 
++WORDCHARS 0123456789’
++
+ NOSUGGEST !
+ REP 36
+ REP f ph
+-- 
+2.43.0
+

@@ -21,6 +21,10 @@ PLOCALES=( "en-AU" "en-CA" "en-GB" "en-US" "en-ZA" )
 IUSE+="+l10n_en ${PLOCALES[@]/#/l10n_}"
 REQUIRED_USE="|| ( l10n_en ${PLOCALES[@]/#/l10n_} )"
 
+PATCHES=(
+	"${FILESDIR}/${P}-apostrophe-handling.patch"  # https://github.com/marcoagpinto/aoo-mozilla-en-dict/pull/74
+)
+
 src_prepare() {
 	if use l10n_en-GB || use l10n_en; then
 		MYSPELL_HYPH+=( "hyph_en_GB.dic" )
