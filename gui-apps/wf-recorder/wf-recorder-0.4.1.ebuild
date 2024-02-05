@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Gentoo Authors
+# Copyright 2020-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -22,11 +22,9 @@ IUSE="pulseaudio"
 
 DEPEND="
 	dev-libs/wayland
-	media-video/ffmpeg[x264]
-	pulseaudio? (
-		media-libs/libpulse
-		media-video/ffmpeg[pulseaudio]
-	)
+	media-libs/mesa[wayland]
+	media-video/ffmpeg[pulseaudio?,x264]
+	pulseaudio? ( media-libs/libpulse )
 "
 RDEPEND="${DEPEND}"
 BDEPEND="
