@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -17,7 +17,7 @@ S="${WORKDIR}/${MY_PN}-${PV}"
 
 LICENSE="BSD"
 SLOT="3/29"
-IUSE="large-stack python test"
+IUSE="doc large-stack python test"
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 RESTRICT="!test? ( test )"
 
@@ -35,10 +35,16 @@ RDEPEND="
 DEPEND="${RDEPEND}"
 BDEPEND="
 	virtual/pkgconfig
+	doc? (
+		app-text/doxygen
+		dev-python/breathe
+		dev-python/sphinx
+		dev-python/sphinx-press-theme
+	)
 	python? ( ${PYTHON_DEPS} )
 "
 
-DOCS=( CHANGES.md CONTRIBUTORS.md README.md SECURITY.md docs/PortingGuide2-3.md )
+DOCS=( CHANGES.md CONTRIBUTORS.md README.md SECURITY.md )
 
 pkg_setup() {
 	use python && python-single-r1_pkg_setup
@@ -46,8 +52,7 @@ pkg_setup() {
 
 src_configure() {
 	local mycmakeargs=(
-		# requires press theme, not available in ::gentoo
-		-DBUILD_DOCS=OFF
+		-DBUILD_WEBSITE=$(usex doc)
 		-DIMATH_ENABLE_LARGE_STACK=$(usex large-stack)
 		# the following options are at their default value
 		-DIMATH_HALF_USE_LOOKUP_TABLE=ON
@@ -67,4 +72,9 @@ src_configure() {
 	fi
 
 	cmake_src_configure
+}
+
+src_install() {
+	use doc && HTML_DOCS=( "${BUILD_DIR}/website/sphinx/." )
+	cmake_src_install
 }
