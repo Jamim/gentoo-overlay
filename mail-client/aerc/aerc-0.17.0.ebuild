@@ -1,4 +1,4 @@
-# Copyright 2019-2023 Gentoo Authors
+# Copyright 2019-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -11,8 +11,10 @@ if [[ ${PV} == *9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://git.sr.ht/~rjarry/aerc"
 else
-	SRC_URI="https://git.sr.ht/~rjarry/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
-	SRC_URI+=" https://dev.gentoo.org/~williamh/dist/${P}-deps.tar.xz"
+	SRC_URI="
+		https://git.sr.ht/~rjarry/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz
+		https://gentoo.aur.im/distfiles/${P}-deps.tar.xz
+	"
 	KEYWORDS="~amd64 ~ppc64"
 fi
 
@@ -24,7 +26,7 @@ DEPEND="notmuch? ( net-mail/notmuch:= )"
 RDEPEND="${DEPEND}"
 BDEPEND="
 	>=app-text/scdoc-1.9.7
-	>=dev-lang/go-1.16
+	>=dev-lang/go-1.18
 "
 
 src_unpack() {
