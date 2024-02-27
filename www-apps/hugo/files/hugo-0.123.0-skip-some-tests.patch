@@ -1,4 +1,4 @@
-From 416992cf1404a78560a5e718a584c5fa1f2f9143 Mon Sep 17 00:00:00 2001
+From 1a3938e8c133573f35abe58edd42204575aeffeb Mon Sep 17 00:00:00 2001
 From: tastytea <tastytea@tastytea.de>
 Date: Fri, 8 Sep 2023 20:01:03 +0200
 Subject: [PATCH] skip some tests
@@ -8,12 +8,12 @@ reasons:
   - needs special test dependencies
   - requires network access
 ---
- modules/client_test.go                                  | 4 ++++
- resources/resource_factories/create/integration_test.go | 1 +
+ modules/client_test.go                                        | 4 ++++
+ .../resource_factories/create/create_integration_test.go      | 1 +
  2 files changed, 5 insertions(+)
 
 diff --git a/modules/client_test.go b/modules/client_test.go
-index 75e3c2b08..235d6ed32 100644
+index ea910580f..b957ba984 100644
 --- a/modules/client_test.go
 +++ b/modules/client_test.go
 @@ -68,6 +68,7 @@ github.com/gohugoio/hugoTestModules1_darwin/modh2_2@v1.4.0 github.com/gohugoio/h
@@ -48,18 +48,18 @@ index 75e3c2b08..235d6ed32 100644
  		mcfg := DefaultModuleConfig
  		mcfg.VendorClosest = true
  
-diff --git a/resources/resource_factories/create/integration_test.go b/resources/resource_factories/create/integration_test.go
-index 140c5d091..721a9fc5b 100644
---- a/resources/resource_factories/create/integration_test.go
-+++ b/resources/resource_factories/create/integration_test.go
+diff --git a/resources/resource_factories/create/create_integration_test.go b/resources/resource_factories/create/create_integration_test.go
+index 61bc17adb..13cd6f33f 100644
+--- a/resources/resource_factories/create/create_integration_test.go
++++ b/resources/resource_factories/create/create_integration_test.go
 @@ -25,6 +25,7 @@ import (
  )
  
  func TestGetRemoteHead(t *testing.T) {
 +	t.Skip("Requires network access")
- 
  	files := `
  -- config.toml --
+ [security]
 -- 
-2.41.0
+2.43.0
 
