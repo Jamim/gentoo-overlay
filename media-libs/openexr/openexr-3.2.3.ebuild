@@ -100,6 +100,7 @@ src_configure() {
 		-DBUILD_TESTING="$(usex test)"
 		-DBUILD_WEBSITE="no"
 
+		-DOPENEXR_BUILD_EXAMPLES="$(usex examples)"
 		-DOPENEXR_BUILD_PYTHON="no"
 		-DOPENEXR_BUILD_TOOLS="$(usex utils)"
 		-DOPENEXR_ENABLE_LARGE_STACK="$(usex large-stack)"
@@ -107,7 +108,6 @@ src_configure() {
 
 		-DOPENEXR_INSTALL="yes"
 		-DOPENEXR_INSTALL_DOCS="$(usex doc)"
-		-DOPENEXR_INSTALL_EXAMPLES="$(usex examples)"
 		-DOPENEXR_INSTALL_PKG_CONFIG="yes"
 		-DOPENEXR_INSTALL_TOOLS="$(usex utils)"
 
