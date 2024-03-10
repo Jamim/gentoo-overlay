@@ -25,18 +25,18 @@ SLOT="0/31" # based on SONAME
 KEYWORDS="~amd64 ~arm ~arm64 ~loong -ppc ~ppc64 ~riscv -sparc ~x86 ~amd64-linux ~x86-linux ~x64-macos"
 
 IUSE="cpu_flags_x86_avx doc examples large-stack utils test threads"
+REQUIRED_USE="doc? ( utils )"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
 	app-arch/libdeflate
 	>=dev-libs/imath-3.1.6:=
-	doc? (
-		sys-apps/help2man
-		dev-python/sphinx-press-theme
-	)
 "
 DEPEND="${RDEPEND}"
-BDEPEND="virtual/pkgconfig"
+BDEPEND="
+	virtual/pkgconfig
+	doc? ( sys-apps/help2man )
+"
 
 PATCHES=(
 	"${FILESDIR}/${PN}-3.2.1-bintests-iff-utils.patch"
@@ -106,7 +106,7 @@ src_configure() {
 		-DOPENEXR_ENABLE_THREADING="$(usex threads)"
 
 		-DOPENEXR_INSTALL="yes"
-		-DOPENEXR_INSTALL_DOCS="$(usex doc "$(usex utils)")"
+		-DOPENEXR_INSTALL_DOCS="$(usex doc)"
 		-DOPENEXR_INSTALL_EXAMPLES="$(usex examples)"
 		-DOPENEXR_INSTALL_PKG_CONFIG="yes"
 		-DOPENEXR_INSTALL_TOOLS="$(usex utils)"
