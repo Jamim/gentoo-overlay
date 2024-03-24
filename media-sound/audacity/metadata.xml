@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-  <maintainer type="project">
-    <email>proaudio@gentoo.org</email>
-    <name>Gentoo ProAudio Project</name>
-  </maintainer>
-  <maintainer type="person" proxied="yes">
-    <email>richard@audacityteam.org</email>
-    <name>Richard Ash</name>
-    <description>Upstream - please CC on bugs that concerns upstream</description>
-  </maintainer>
-  <maintainer type="person" proxied="yes">
-    <email>mehw.is.me@inventati.org</email>
-    <name>Matthew White</name>
+  <maintainer type="person">
+    <email>aliaksei.urbanski@gmail.com</email>
+    <name>Aliaksei Urbanski</name>
   </maintainer>
   <upstream>
     <remote-id type="github">audacity/audacity</remote-id>
