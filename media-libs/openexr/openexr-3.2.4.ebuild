@@ -29,7 +29,7 @@ REQUIRED_USE="doc? ( utils )"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
-	app-arch/libdeflate
+	app-arch/libdeflate[zlib]
 	>=dev-libs/imath-3.1.6:=
 "
 DEPEND="${RDEPEND}"
@@ -51,10 +51,6 @@ src_prepare() {
 
 	sed -e "s:if(INSTALL_DOCS):if(OPENEXR_INSTALL_DOCS):" \
 		-i docs/CMakeLists.txt || die
-
-	if use x86; then
-		eapply "${FILESDIR}/${PN}-3.1.5-drop-failing-testDwaLookups.patch"
-	fi
 
 	cmake_src_prepare
 
@@ -126,6 +122,16 @@ src_configure() {
 	fi
 
 	cmake_src_configure
+}
+
+src_test() {
+    local CMAKE_SKIP_TESTS=()
+
+    use x86 && CMAKE_SKIP_TESTS+=(
+        '^OpenEXR.testDwaLookups$'
+    )
+
+    cmake_src_test
 }
 
 src_install() {
