@@ -82,7 +82,7 @@ RDEPEND="${CDEPEND}
 	webkit? ( || ( net-libs/webkit-gtk:4.1 net-libs/webkit-gtk:6 ) )
 "
 DEPEND="${CDEPEND}
-	>=dev-cpp/cppgir-0_p20240110
+	>=dev-cpp/cppgir-2.0_p20240315
 	>=dev-cpp/ms-gsl-4
 	dev-cpp/expected-lite
 	dev-cpp/range-v3
@@ -90,7 +90,7 @@ DEPEND="${CDEPEND}
 BDEPEND="
 	${PYTHON_DEPS}
 	>=dev-build/cmake-3.16
-	>=dev-cpp/cppgir-0_p20230926
+	>=dev-cpp/cppgir-2.0_p20240315
 	dev-util/gdbus-codegen
 	virtual/pkgconfig
 	wayland? ( dev-util/wayland-scanner )
