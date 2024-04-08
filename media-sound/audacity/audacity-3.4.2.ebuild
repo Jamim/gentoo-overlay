@@ -112,11 +112,11 @@ RDEPEND="dev-db/sqlite:3
 "
 DEPEND="${RDEPEND}
 	dev-libs/rapidjson
+	x11-base/xorg-proto
 	test? ( <dev-cpp/catch-3:0 )"
-BDEPEND="
+BDEPEND="|| ( dev-lang/nasm dev-lang/yasm )
 	sys-devel/gettext
-	virtual/pkgconfig
-"
+	virtual/pkgconfig"
 
 PATCHES=(
 	# Equivalent to previous versions
