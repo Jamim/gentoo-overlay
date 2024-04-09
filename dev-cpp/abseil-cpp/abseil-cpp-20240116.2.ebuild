@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Gentoo Authors
+# Copyright 2020-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -15,9 +15,6 @@ LICENSE="Apache-2.0"
 SLOT="0/${PV%%.*}"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~sparc ~x86"
 IUSE="test"
-
-DEPEND=""
-RDEPEND="${DEPEND}"
 
 BDEPEND="
 	${PYTHON_DEPS}
