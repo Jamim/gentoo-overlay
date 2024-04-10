@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<maintainer type="person" proxied="yes">
-		<email>arfrever.fta@gmail.com</email>
-		<name>Arfrever Frehtes Taifersar Arahesis</name>
-	</maintainer>
-	<maintainer type="project">
-		<email>cjk@gentoo.org</email>
-		<name>Cjk</name>
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<slots>
 		<subslots>Soname version number</subslots>
