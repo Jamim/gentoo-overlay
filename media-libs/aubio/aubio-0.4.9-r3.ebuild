@@ -1,20 +1,27 @@
 # Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
+DISTUTILS_USE_PEP517=setuptools
+DISTUTILS_EXT=1
 DISTUTILS_OPTIONAL=1
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{10..12} )
 PYTHON_REQ_USE='threads(+)'
 inherit distutils-r1 waf-utils
 
 DESCRIPTION="Library for audio labelling"
 HOMEPAGE="https://aubio.org/"
-SRC_URI="https://aubio.org/pub/${P}.tar.bz2"
+WAFVERSION=2.0.27
+WAFTARBALL=waf-${WAFVERSION}.tar.bz2
+SRC_URI="
+	https://aubio.org/pub/${P}.tar.bz2
+	https://waf.io/${WAFTARBALL}
+"
 
 LICENSE="GPL-3"
 SLOT="0/5"
-KEYWORDS="amd64 ~loong ~ppc ppc64 sparc x86"
+KEYWORDS="~amd64 ~loong ~ppc ~ppc64 ~sparc ~x86"
 IUSE="doc double-precision examples ffmpeg fftw jack libsamplerate sndfile python test"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}
@@ -42,17 +49,17 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig
 	doc? (
 		app-text/doxygen
-		dev-python/sphinx
+		dev-python/sphinx[${PYTHON_USEDEP}]
 	)
 "
+BDEPEND="${DISTUTILS_DEPS}"
 
 DOCS=( AUTHORS ChangeLog README.md )
 PYTHON_SRC_DIR="${S}"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-0.4.9-docdir.patch
+	"${FILESDIR}"/${P}-docdir.patch
 	"${FILESDIR}"/ffmpeg5.patch
-	"${FILESDIR}"/${PN}-0.4.9-remove-universal-newlines.patch
 )
 
 src_prepare() {
@@ -68,6 +75,14 @@ src_prepare() {
 	if ! use test; then
 		sed -e "/bld.*tests/d" -i wscript || die
 	fi
+
+	# update waf to fix Python 3.12 compatibility
+	sed -r \
+		-e "s:(WAFVERSION=).*:\1${WAFVERSION}:" \
+		-e "s:(WAFURL=).*:\1'${DISTDIR}/${WAFTARBALL}':" \
+		-e 's:^fetchwaf$:cp "${WAFURL}" "${WAFTARBALL}":' \
+		-i scripts/get_waf.sh || die
+	emake expandwaf
 }
 
 src_configure() {
@@ -103,7 +118,7 @@ src_compile() {
 		distutils-r1_src_compile
 
 		if use doc ; then
-			# No API function like distutils_install_for_testing available for this use case
+			# No API function available for this use case
 			pushd "${S}"/doc &>/dev/null || die
 			python_setup
 			LD_LIBRARY_PATH="${S}/build/src:${LD_LIBRARY_PATH}" \
