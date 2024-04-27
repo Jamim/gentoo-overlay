@@ -14,11 +14,11 @@ SLOT="1"
 IUSE="+introspection test +vala"
 REQUIRED_USE="vala? ( introspection )"
 
-KEYWORDS="amd64 ~arm arm64 ~loong ppc ppc64 ~riscv x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc ~ppc64 ~riscv ~x86"
 
 RDEPEND="
 	>=dev-libs/glib-2.76:2
-	>=gui-libs/gtk-4.11.3:4[introspection?]
+	>=gui-libs/gtk-4.13.4:4[introspection?]
 	dev-libs/appstream:=
 	dev-libs/fribidi
 	introspection? ( >=dev-libs/gobject-introspection-1.54:= )
