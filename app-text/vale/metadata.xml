@@ -2,10 +2,17 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>erkiferenc@gmail.com</email>
-		<name>Ferenc Erki</name>
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<upstream>
+		<maintainer status="active">
+			<email>joseph@jdkato.io</email>
+			<name>Joseph Kato</name>
+		</maintainer>
+		<changelog>https://github.com/errata-ai/vale/releases</changelog>
+		<doc>https://vale.sh/docs/</doc>
+		<bugs-to>https://github.com/errata-ai/vale/issues</bugs-to>
 		<remote-id type="github">errata-ai/vale</remote-id>
 	</upstream>
 </pkgmetadata>

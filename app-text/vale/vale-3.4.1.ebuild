@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Gentoo Authors
+# Copyright 2021-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -9,8 +9,8 @@ DESCRIPTION="A syntax-aware linter for prose built with speed and extensibility 
 HOMEPAGE="https://vale.sh/docs/"
 
 SRC_URI="
-	https://github.com/errata-ai/vale/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	https://github.com/ferki/${PN}/releases/download/v${PV}-gentoo-deps/${P}-gentoo-deps.tar.xz
+	https://github.com/errata-ai/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
+	https://gentoo.aur.im/distfiles/${P}-deps.tar.xz
 "
 
 LICENSE="Apache-2.0 BSD BSD-2 MIT public-domain"
