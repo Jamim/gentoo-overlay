@@ -10,7 +10,7 @@ TEST_OEXR_IMAGE_COMMIT="df16e765fee28a947244657cae3251959ae63c00"
 inherit cmake flag-o-matic font python-single-r1 virtualx
 
 DESCRIPTION="A library for reading and writing images"
-HOMEPAGE="https://sites.google.com/site/openimageio/ https://github.com/OpenImageIO"
+HOMEPAGE="https://sites.google.com/site/openimageio/ https://github.com/AcademySoftwareFoundation/OpenImageIO"
 SRC_URI="
 	https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/v${PV}.tar.gz -> ${P}.tar.gz
 	test? (
