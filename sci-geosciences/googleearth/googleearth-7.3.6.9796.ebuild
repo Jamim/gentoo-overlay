@@ -7,12 +7,15 @@ inherit desktop pax-utils unpacker wrapper xdg-utils
 
 DESCRIPTION="A 3D interface to the planet"
 HOMEPAGE="https://www.google.com/earth/desktop/"
-SRC_URI="https://dl.google.com/dl/linux/direct/google-earth-pro-stable_${PV}_amd64.deb"
+SRC_URI="
+	https://dl.google.com/dl/linux/direct/google-earth-pro-stable_$(ver_cut 1-3)_amd64.deb
+		-> ${PN}-pro-${PV}_amd64.deb
+"
+S=${WORKDIR}/opt/google/earth/pro
 LICENSE="googleearth GPL-2"
 SLOT="0"
 KEYWORDS="~amd64"
 RESTRICT="mirror splitdebug"
-IUSE=""
 
 QA_PREBUILT="*"
 
@@ -40,8 +43,6 @@ RDEPEND="
 	x11-libs/libXdmcp"
 #		sci-libs/gdal-1*
 BDEPEND="dev-util/patchelf"
-
-S=${WORKDIR}/opt/google/earth/pro
 
 src_unpack() {
 	# default src_unpack fails with deb2targz installed, also this unpacks the data.tar.lzma as well
