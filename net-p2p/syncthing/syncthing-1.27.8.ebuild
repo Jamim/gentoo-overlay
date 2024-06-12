@@ -6,7 +6,7 @@ EAPI=8
 inherit desktop go-module systemd xdg-utils
 
 DESCRIPTION="Open Source Continuous File Synchronization"
-HOMEPAGE="https://syncthing.net"
+HOMEPAGE="https://syncthing.net https://github.com/syncthing/syncthing"
 SRC_URI="https://github.com/${PN}/${PN}/releases/download/v${PV}/${PN}-source-v${PV}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="Apache-2.0 BSD BSD-2 CC0-1.0 ISC MIT MPL-2.0 Unlicense"
