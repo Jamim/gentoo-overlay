@@ -17,7 +17,7 @@ S="${WORKDIR}/${MY_P}"
 LICENSE="BSD GPL-3-with-openssl-exception LGPL-2+"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~loong ~ppc64 ~riscv"
-IUSE="dbus enchant +fonts +jemalloc screencast qt6 qt6-imageformats wayland webkit +X"
+IUSE="dbus enchant +fonts +jemalloc +libdispatch screencast qt6 qt6-imageformats wayland webkit +X"
 REQUIRED_USE="
 	qt6-imageformats? ( qt6 )
 "
@@ -33,7 +33,7 @@ CDEPEND="
 	dev-cpp/abseil-cpp:=
 	>=dev-cpp/glibmm-2.77:2.68
 	dev-libs/glib:2
-	dev-libs/libdispatch
+	libdispatch? ( dev-libs/libdispatch )
 	dev-libs/openssl:=
 	dev-libs/protobuf
 	dev-libs/xxhash
@@ -146,6 +146,11 @@ src_prepare() {
 			-i cmake/external/qt/package.cmake || die
 	fi
 
+	if ! use libdispatch; then
+		sed -e '/add_checked_subdirectory(dispatch)/d' \
+			-i cmake/external/CMakeLists.txt || die
+	fi
+
 	cmake_src_prepare
 }
 
@@ -229,6 +234,12 @@ pkg_postinst() {
 		# https://github.com/desktop-app/cmake_helpers/pull/91#issuecomment-881788003
 		ewarn "Disabling USE=jemalloc on glibc systems may cause very high RAM usage!"
 		ewarn "Do NOT report issues about RAM usage without enabling this flag first."
+		ewarn
+	fi
+	if ! use libdispatch; then
+		ewarn "Disabling USE=libdispatch may cause performance degradation"
+		ewarn "due to fallback to poor QThreadPool! Please see"
+		ewarn "https://github.com/telegramdesktop/tdesktop/wiki/The-Packaged-Building-Mode"
 		ewarn
 	fi
 	if use wayland && ! use qt6; then
