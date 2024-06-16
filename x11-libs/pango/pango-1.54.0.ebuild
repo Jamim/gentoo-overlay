@@ -13,7 +13,7 @@ LICENSE="LGPL-2+"
 SLOT="0"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
 
-IUSE="debug +introspection sysprof test X"
+IUSE="debug examples +introspection sysprof test X"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
@@ -45,6 +45,9 @@ src_prepare() {
 	default
 	xdg_environment_reset
 	gnome2_environment_reset
+
+	# get rid of win32 example
+	rm examples/pangowin32tobmp.c || die
 }
 
 multilib_src_configure() {
@@ -58,9 +61,10 @@ multilib_src_configure() {
 		# Never use gi-docgen subproject
 		--wrap-mode nofallback
 
-		-Dgtk_doc=false # we ship pregenerated docs
+		-Ddocumentation=false # we ship pregenerated docs
 		$(meson_native_use_feature introspection)
-		-Dinstall-tests=false
+		$(meson_use test build-testsuite)
+		-Dbuild-examples=false
 		-Dfontconfig=enabled
 		$(meson_feature sysprof)
 		-Dlibthai=disabled
@@ -72,6 +76,10 @@ multilib_src_configure() {
 }
 
 multilib_src_install_all() {
+	if use examples; then
+		dodoc -r examples
+	fi
+
 	insinto /usr/share/gtk-doc/html
 	# This will install PangoXft API docs regardless of USE=-X, but this is intentional
 	doins -r "${S}"/docs/Pango*
