@@ -6,7 +6,7 @@ EAPI=8
 inherit gstreamer-meson
 
 DESCRIPTION="Open source multimedia framework"
-HOMEPAGE="https://gstreamer.freedesktop.org/"
+HOMEPAGE="https://gstreamer.freedesktop.org/ https://gitlab.freedesktop.org/gstreamer/gstreamer"
 SRC_URI="https://${PN}.freedesktop.org/src/${PN}/${P}.tar.xz"
 
 LICENSE="LGPL-2+"
