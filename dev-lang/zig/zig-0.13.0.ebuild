@@ -3,8 +3,8 @@
 
 EAPI=8
 
-LLVM_MAX_SLOT=17
-inherit edo cmake llvm check-reqs toolchain-funcs
+LLVM_MAX_SLOT=18
+inherit edo check-reqs cmake llvm multiprocessing toolchain-funcs
 
 DESCRIPTION="A robust, optimal, and maintainable programming language"
 HOMEPAGE="https://ziglang.org/"
@@ -67,6 +67,12 @@ QA_FLAGS_IGNORED="usr/.*/zig/${PV}/bin/zig"
 # Zig uses self-hosted compiler only
 CHECKREQS_MEMORY="4G"
 
+PATCHES=(
+	"${FILESDIR}/${P}-test-fmt-no-doc.patch"
+	"${FILESDIR}/${P}-test-std-kernel-version.patch"
+	"${FILESDIR}/${P}-fix-dir-makepath.patch"
+)
+
 llvm_check_deps() {
 	has_version "sys-devel/clang:${LLVM_SLOT}"
 }
@@ -122,7 +128,6 @@ src_configure() {
 	export ZIG_GLOBAL_CACHE_DIR="${T}/zig-global-cache"
 
 	local mycmakeargs=(
-		-DZIG_USE_CCACHE=OFF
 		-DZIG_SHARED_LLVM=ON
 		-DZIG_TARGET_TRIPLE="$(get_zig_target)"
 		-DZIG_TARGET_MCPU="$(get_zig_mcpu)"
@@ -148,17 +153,41 @@ src_compile() {
 
 src_test() {
 	cd "${BUILD_DIR}" || die
-	local ZIG_TEST_ARGS="-Dstatic-llvm=false -Denable-llvm -Dskip-non-native \
-		-Doptimize=ReleaseSafe -Dtarget=$(get_zig_target) -Dcpu=$(get_zig_mcpu)"
+	local ZIG_TEST_ARGS=(
+		-j$(makeopts_jobs)
+		--color on
+		--summary all
+		--verbose
+		-Dstatic-llvm=false
+		-Denable-llvm
+		-Dskip-non-native
+		-Doptimize=Debug
+		-Dtarget="$(get_zig_target)"
+		-Dcpu="$(get_zig_mcpu)"
+	)
 	local ZIG_TEST_STEPS=(
-		test-cases test-fmt test-behavior test-compiler-rt test-universal-libc test-compare-output
-		test-standalone test-c-abi test-link test-stack-traces test-cli test-asm-link test-translate-c
-		test-run-translated-c test-std
+		test-asm-link
+		test-behavior
+		test-c-abi
+		test-c-import
+		test-cases
+		test-cli
+		test-compare-output
+		test-compiler-rt
+		test-fmt
+		test-link
+		test-run-translated-c
+		test-stack-traces
+		test-standalone
+		test-std
+		test-translate-c
+		test-universal-libc
 	)
 
 	local step
 	for step in "${ZIG_TEST_STEPS[@]}" ; do
-		edob ./stage3/bin/zig build ${step} ${ZIG_TEST_ARGS}
+		# to keep the verbosity, don't use edob here
+		./stage3/bin/zig build ${step} ${ZIG_TEST_ARGS[@]} || die
 	done
 }
 
@@ -174,9 +203,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	eselect zig update ifunset
+	eselect zig update ifunset || die
 }
 
 pkg_postrm() {
-	eselect zig update ifunset
+	eselect zig update ifunset || die
 }
