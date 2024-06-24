@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<maintainer type="person" proxied="yes">
-		<email>leohdz172@proton.me</email>
-		<name>Leonardo Hernández Hernández</name>
-	</maintainer>
-	<maintainer type="project" proxied="proxy">
-		<email>proxy-maint@gentoo.org</email>
-		<name>Proxy Maintainers</name>
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<upstream>
+		<maintainer status="active">
+			<email>christina@cafkafk.com</email>
+			<name>Christina Sørensen</name>
+		</maintainer>
 		<remote-id type="github">eza-community/eza</remote-id>
 	</upstream>
 </pkgmetadata>

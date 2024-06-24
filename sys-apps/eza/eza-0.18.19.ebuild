@@ -16,6 +16,7 @@ CRATES="
 	anstyle@1.0.3
 	approx@0.5.1
 	autocfg@1.1.0
+	automod@1.0.14
 	base64@0.21.5
 	bitflags@1.3.2
 	bitflags@2.4.0
@@ -51,7 +52,7 @@ CRATES="
 	fastrand@2.0.0
 	filetime@0.2.22
 	form_urlencoded@1.0.1
-	git2@0.18.3
+	git2@0.19.0
 	glob@0.3.1
 	half@1.8.2
 	hashbrown@0.14.2
@@ -67,8 +68,8 @@ CRATES="
 	itoa@1.0.9
 	jobserver@0.1.22
 	js-sys@0.3.64
-	libc@0.2.154
-	libgit2-sys@0.16.2+1.7.2
+	libc@0.2.155
+	libgit2-sys@0.17.0+1.8.1
 	libz-sys@1.1.2
 	line-wrap@0.2.0
 	linux-raw-sys@0.4.11
@@ -102,10 +103,10 @@ CRATES="
 	plotters-svg@0.3.5
 	plotters@0.3.5
 	powerfmt@0.2.0
-	proc-macro2@1.0.66
+	proc-macro2@1.0.83
 	proc-mounts@0.3.0
 	quick-xml@0.31.0
-	quote@1.0.33
+	quote@1.0.36
 	rand@0.8.5
 	rand_core@0.6.4
 	rayon-core@1.12.1
@@ -126,9 +127,9 @@ CRATES="
 	shlex@1.3.0
 	similar@2.2.1
 	siphasher@0.3.11
-	snapbox-macros@0.3.8
-	snapbox@0.5.9
-	syn@2.0.29
+	snapbox-macros@0.3.9
+	snapbox@0.5.12
+	syn@2.0.65
 	tempfile@3.8.0
 	terminal_size@0.3.0
 	thiserror-impl@1.0.48
@@ -141,12 +142,12 @@ CRATES="
 	tinyvec@1.2.0
 	tinyvec_macros@0.1.0
 	toml_datetime@0.6.5
-	toml_edit@0.22.6
-	trycmd@0.15.1
+	toml_edit@0.19.15
+	trycmd@0.15.2
 	unicode-bidi@0.3.5
 	unicode-ident@1.0.11
 	unicode-normalization@0.1.17
-	unicode-width@0.1.12
+	unicode-width@0.1.13
 	url@2.2.1
 	utf8parse@0.2.1
 	uutils_term_grid@0.6.0
@@ -183,7 +184,7 @@ CRATES="
 	windows_x86_64_gnullvm@0.52.0
 	windows_x86_64_msvc@0.48.5
 	windows_x86_64_msvc@0.52.0
-	winnow@0.6.2
+	winnow@0.5.40
 	zoneinfo_compiled@0.5.1
 "
 
@@ -193,7 +194,7 @@ inherit cargo shell-completion
 MANPAGES_BASE_URI="https://github.com/sevz17/eza-manpages/releases/download/${PV}"
 
 DESCRIPTION="A modern, maintained replacement for ls"
-HOMEPAGE="https://github.com/eza-community/eza"
+HOMEPAGE="https://eza.rocks https://github.com/eza-community/eza"
 SRC_URI="https://github.com/eza-community/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
 	${MANPAGES_BASE_URI}/${P}-manpages.tar.xz
 	${CARGO_CRATE_URIS}
@@ -206,7 +207,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~loong ~ppc64 ~riscv ~x86"
 IUSE="+git"
 
-DEPEND="git? ( >=dev-libs/libgit2-1.7.0:= )"
+DEPEND="git? ( >=dev-libs/libgit2-1.8.1:= )"
 RDEPEND="${DEPEND}"
 BDEPEND=">=virtual/rust-1.70.0"
 
@@ -215,19 +216,13 @@ QA_FLAGS_IGNORED="usr/bin/${PN}"
 src_prepare() {
 	default
 
-	# Known failing test, upstream says it could potentially be ignored for know
+	# Known failing test, upstream says it could potentially be ignored for now
 	# bug #914214
 	# https://github.com/eza-community/eza/issues/393
 	rm tests/cmd/{icons,basic}_all.toml || die
 	rm tests/cmd/absolute{,_recurse}_unix.toml || die
 
 	sed -i -e 's/^strip = true$/strip = false/g' Cargo.toml || die "failed to disable stripping"
-
-	if use git; then
-		# libgit2-sys unnecessarily(?) requests <libgit2-1.8.0, bump to 2 for now
-		sed -e '/range_version/s/1\.8\.0/2/' \
-			-i "${ECARGO_VENDOR}"/libgit2-sys-0.16.2+1.7.2/build.rs || die
-	fi
 }
 
 src_configure() {
