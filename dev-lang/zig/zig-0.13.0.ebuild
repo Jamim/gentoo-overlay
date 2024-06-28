@@ -7,7 +7,9 @@ LLVM_MAX_SLOT=18
 inherit edo check-reqs cmake llvm multiprocessing toolchain-funcs
 
 DESCRIPTION="A robust, optimal, and maintainable programming language"
-HOMEPAGE="https://ziglang.org/"
+HOMEPAGE="https://ziglang.org https://github.com/ziglang/zig"
+
+BDEPEND="test? ( !!<sys-apps/sandbox-2.39 )"
 if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/ziglang/zig.git"
 	inherit git-r3
@@ -22,7 +24,7 @@ else
 	"
 	KEYWORDS="~amd64 ~arm ~arm64"
 
-	BDEPEND="verify-sig? ( sec-keys/minisig-keys-zig-software-foundation )"
+	BDEPEND+=" verify-sig? ( sec-keys/minisig-keys-zig-software-foundation )"
 fi
 
 # project itself: MIT
@@ -38,7 +40,8 @@ fi
 # lib/libc/glibc: BSD HPND ISC inner-net LGPL-2.1+
 LICENSE="MIT Apache-2.0-with-LLVM-exceptions || ( UoI-NCSA MIT ) || ( Apache-2.0-with-LLVM-exceptions Apache-2.0 MIT BSD-2 ) public-domain BSD-2 ZPL ISC HPND BSD inner-net LGPL-2.1+"
 SLOT="$(ver_cut 1-2)"
-IUSE="doc"
+IUSE="doc test"
+RESTRICT="!test? ( test )"
 
 BUILD_DIR="${S}/build"
 
@@ -70,7 +73,6 @@ CHECKREQS_MEMORY="4G"
 PATCHES=(
 	"${FILESDIR}/${P}-test-fmt-no-doc.patch"
 	"${FILESDIR}/${P}-test-std-kernel-version.patch"
-	"${FILESDIR}/${P}-fix-dir-makepath.patch"
 )
 
 llvm_check_deps() {
