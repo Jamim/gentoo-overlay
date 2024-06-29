@@ -42,7 +42,7 @@ BDEPEND="
 PDEPEND="openntpd? ( net-misc/openntpd )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-4.2.8-ipc-caps.patch # bug #533966
+	"${FILESDIR}"/${PN}-4.2.8_p18-ipc-caps.patch # bug #533966
 	"${FILESDIR}"/${PN}-4.2.8-sntp-test-pthreads.patch # bug #563922
 	"${FILESDIR}"/${PN}-4.2.8_p14-add_cap_ipc_lock.patch # bug #711530
 	"${FILESDIR}"/${PN}-4.2.8_p15-configure-clang16.patch
