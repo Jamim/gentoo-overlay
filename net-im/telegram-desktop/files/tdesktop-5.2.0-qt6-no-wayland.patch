@@ -15,55 +15,46 @@ https://github.com/desktop-app/cmake_helpers/commit/a428df5440e76a726abc30924766
  namespace base::Platform {
  
  void RunWithXdgActivationToken(Fn<void(QString)> callback) {
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+-#if defined QT_FEATURE_wayland && QT_CONFIG(wayland)
++#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && defined QT_FEATURE_wayland && QT_CONFIG(wayland)
  	const auto window = QGuiApplication::focusWindow();
  	if (!window) {
  		callback({});
 --- a/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp
 +++ b/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp
-@@ -413,7 +413,7 @@
+@@ -414,7 +414,7 @@
  }
  #endif // !DESKTOP_APP_DISABLE_X11_INTEGRATION
  
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+-#if defined QT_FEATURE_wayland && QT_CONFIG(wayland)
++#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && defined QT_FEATURE_wayland && QT_CONFIG(wayland)
  void ShowWaylandWindowMenu(not_null<QWidget*> widget, const QPoint &point) {
  	static const auto wl_proxy_marshal_array = [] {
  		void (*result)(
-@@ -533,7 +533,7 @@
+@@ -544,7 +544,7 @@
  }
  
  bool WindowMarginsSupported() {
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+-#if defined QT_FEATURE_wayland && QT_CONFIG(wayland)
++#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && defined QT_FEATURE_wayland && QT_CONFIG(wayland)
  	static const auto WaylandResult = [] {
  		using namespace QNativeInterface::Private;
  		QWindow window;
-@@ -560,7 +560,7 @@
+@@ -571,7 +571,7 @@
  }
  
  void SetWindowMargins(not_null<QWidget*> widget, const QMargins &margins) {
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+-#if defined QT_FEATURE_wayland && QT_CONFIG(wayland)
++#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && defined QT_FEATURE_wayland && QT_CONFIG(wayland)
  	using namespace QNativeInterface::Private;
  	const auto window = not_null(widget->windowHandle());
  	const auto platformWindow = not_null(window->handle());
-@@ -582,7 +582,7 @@
- }
- 
- void UnsetWindowMargins(not_null<QWidget*> widget) {
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
- 	using namespace QNativeInterface::Private;
- 	if (const auto native = not_null(widget->windowHandle())
- 			->nativeInterface<QWaylandWindow>()) {
-@@ -600,7 +600,7 @@
+@@ -593,7 +593,7 @@
  }
  
  void ShowWindowMenu(not_null<QWidget*> widget, const QPoint &point) {
--#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-+#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+-#if defined QT_FEATURE_wayland && QT_CONFIG(wayland)
++#if !defined DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION && defined QT_FEATURE_wayland && QT_CONFIG(wayland)
  	if (::Platform::IsWayland()) {
  		ShowWaylandWindowMenu(widget, point);
  		return;

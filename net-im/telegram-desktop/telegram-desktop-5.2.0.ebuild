@@ -8,7 +8,7 @@ PYTHON_COMPAT=( python3_{10..13} )
 inherit xdg cmake python-any-r1 optfeature flag-o-matic
 
 DESCRIPTION="Official desktop client for Telegram"
-HOMEPAGE="https://desktop.telegram.org"
+HOMEPAGE="https://desktop.telegram.org https://github.com/telegramdesktop/tdesktop"
 
 MY_P="tdesktop-${PV}-full"
 SRC_URI="https://github.com/telegramdesktop/tdesktop/releases/download/v${PV}/${MY_P}.tar.gz"
@@ -98,9 +98,10 @@ BDEPEND="
 "
 
 PATCHES=(
-	"${FILESDIR}/tdesktop-4.2.4-jemalloc-only-telegram-r1.patch"
-	"${FILESDIR}/tdesktop-4.10.0-system-cppgir.patch"
-	"${FILESDIR}/tdesktop-5.0.1-qt6-no-wayland.patch"
+	"${FILESDIR}"/tdesktop-4.2.4-jemalloc-only-telegram-r1.patch
+	"${FILESDIR}"/tdesktop-4.10.0-system-cppgir.patch
+	"${FILESDIR}"/tdesktop-5.2.0-qt6-no-wayland.patch
+	"${FILESDIR}"/tdesktop-5.2.0-libdispatch.patch
 )
 
 pkg_pretend() {
@@ -146,11 +147,6 @@ src_prepare() {
 			-i cmake/external/qt/package.cmake || die
 	fi
 
-	if ! use libdispatch; then
-		sed -e '/add_checked_subdirectory(dispatch)/d' \
-			-i cmake/external/CMakeLists.txt || die
-	fi
-
 	cmake_src_prepare
 }
 
@@ -168,6 +164,9 @@ src_configure() {
 	# the same state across both projects.
 	# See https://bugs.gentoo.org/866055
 	append-cppflags '-DNDEBUG'
+
+	# https://github.com/telegramdesktop/tdesktop/issues/17437#issuecomment-1001160398
+	use !libdispatch && append-cppflags -DCRL_FORCE_QT
 
 	local qt=$(usex qt6 6 5)
 	local mycmakeargs=(
@@ -188,6 +187,7 @@ src_configure() {
 		## KF6CoreAddons is currently unavailable in ::gentoo
 		-DCMAKE_DISABLE_FIND_PACKAGE_KF${qt}CoreAddons=$(usex qt6)
 
+		-DDESKTOP_APP_USE_LIBDISPATCH=$(usex libdispatch)
 		-DDESKTOP_APP_DISABLE_X11_INTEGRATION=$(usex !X)
 		-DDESKTOP_APP_DISABLE_WAYLAND_INTEGRATION=$(usex !wayland)
 		-DDESKTOP_APP_DISABLE_JEMALLOC=$(usex !jemalloc)
