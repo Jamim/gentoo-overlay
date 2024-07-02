@@ -9,6 +9,8 @@ DESCRIPTION="Open Source Continuous File Synchronization"
 HOMEPAGE="https://syncthing.net https://github.com/syncthing/syncthing"
 SRC_URI="https://github.com/${PN}/${PN}/releases/download/v${PV}/${PN}-source-v${PV}.tar.gz -> ${P}.tar.gz"
 
+S="${WORKDIR}"/${PN}
+
 LICENSE="Apache-2.0 BSD BSD-2 CC0-1.0 ISC MIT MPL-2.0 Unlicense"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x86"
@@ -26,10 +28,8 @@ DOCS=( README.md AUTHORS CONTRIBUTING.md )
 PATCHES=(
 	"${FILESDIR}"/${PN}-1.3.4-TestIssue5063_timeout.patch
 	"${FILESDIR}"/${PN}-1.18.4-tool_users.patch
-	"${FILESDIR}"/${PN}-1.27.4-tests_race.patch
+	"${FILESDIR}"/${PN}-1.23.2-tests_race.patch
 )
-
-S="${WORKDIR}"/${PN}
 
 src_prepare() {
 	# Bug #679280
@@ -70,14 +70,6 @@ src_install() {
 	done
 	newicon -s scalable assets/logo-only.svg ${PN}.svg
 
-	if use tools; then
-		exeinto /usr/libexec/syncthing
-		local exe
-		for exe in bin/* ; do
-			[[ "${exe}" == "bin/syncthing" ]] || doexe "${exe}"
-		done
-	fi
-
 	systemd_dounit etc/linux-systemd/system/${PN}{@,-resume}.service
 	systemd_douserunit etc/linux-systemd/user/${PN}.service
 	newconfd "${FILESDIR}"/${PN}.confd ${PN}
@@ -87,7 +79,16 @@ src_install() {
 	insinto /etc/logrotate.d
 	newins "${FILESDIR}"/${PN}.logrotate ${PN}
 
+	insinto /etc/ufw/applications.d
+	doins etc/firewall-ufw/${PN}
+
 	if use tools; then
+		exeinto /usr/libexec/syncthing
+		local exe
+		for exe in bin/* ; do
+			[[ "${exe}" == "bin/syncthing" ]] || doexe "${exe}"
+		done
+
 		systemd_dounit cmd/stdiscosrv/etc/linux-systemd/stdiscosrv.service
 		newconfd "${FILESDIR}"/stdiscosrv.confd stdiscosrv
 		newinitd "${FILESDIR}"/stdiscosrv.initd-r1 stdiscosrv
