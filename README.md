@@ -7,10 +7,15 @@ where I try to keep some packages up-to-date.
 
 In case you want to add it, please use [eselect-repository][eselect-repo].
 ```shell
-eselect repository add mim git https://github.com/Jamim/gentoo-overlay.git
+eselect repository enable mim
 ```
 
-I encourage you to initially [mask][masking] all the content of any new overlay, including mine.
+Don't forget to sync the repository.
+```shell
+emaint sync -r mim
+```
+
+I encourage you to initially [mask][masking] all the content of [any new overlay][repos], including mine.
 ```shell
 echo '*/*::mim' >> /etc/portage/package.mask/overlays
 ```
@@ -38,5 +43,6 @@ have any trouble with this overlay or its content.
 [ebuild-repo]: https://wiki.gentoo.org/wiki/Ebuild_repository
 [eselect-repo]: https://wiki.gentoo.org/wiki/Eselect/Repository
 [masking]: https://wiki.gentoo.org/wiki/Ebuild_repository#Masking_enabled_ebuild_repositories
+[repos]: https://repos.gentoo.org
 [gentoo]: https://www.gentoo.org
 [new-issue]: https://github.com/Jamim/gentoo-overlay/issues/new
