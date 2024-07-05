@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..12} )
+PYTHON_COMPAT=( python3_{10..13} )
 inherit cuda java-pkg-opt-2 java-ant-2 cmake-multilib flag-o-matic python-r1 toolchain-funcs virtualx
 
 DESCRIPTION="A collection of algorithms and sample code for various computer vision problems"
@@ -72,7 +72,7 @@ IUSE+=" opencl cuda cudnn video_cards_intel"
 # video
 IUSE+=" +ffmpeg gstreamer xine vaapi v4l gphoto2 ieee1394"
 # image
-IUSE+=" gdal jasper jpeg jpeg2k openexr png quirc tesseract tiff webp"
+IUSE+=" avif gdal jasper jpeg jpeg2k openexr png quirc tesseract tiff webp"
 # gui
 IUSE+=" gtk3 qt5 qt6 opengl vtk"
 # parallel
@@ -111,10 +111,7 @@ REQUIRED_USE="
 	amd64? ( cpu_flags_x86_sse cpu_flags_x86_sse2 )
 	cpu_flags_x86_avx2? ( cpu_flags_x86_f16c )
 	cpu_flags_x86_f16c? ( cpu_flags_x86_avx )
-	cuda? (
-		contrib
-		tesseract? ( opencl )
-	)
+	cuda? ( contrib	)
 	cudnn? ( cuda )
 	dnnsamples? ( examples )
 	gflags? ( contrib )
@@ -142,10 +139,11 @@ REQUIRED_USE+="
 RESTRICT="!test? ( test )"
 
 RDEPEND="
+	avif? ( media-libs/libavif:=[${MULTILIB_USEDEP}] )
 	app-arch/bzip2[${MULTILIB_USEDEP}]
 	dev-libs/protobuf:=[${MULTILIB_USEDEP}]
 	sys-libs/zlib[${MULTILIB_USEDEP}]
-	cuda? ( <dev-util/nvidia-cuda-toolkit-12.4:0= )
+	cuda? ( dev-util/nvidia-cuda-toolkit:= )
 	cudnn? ( dev-libs/cudnn:= )
 	contribdnn? ( dev-libs/flatbuffers:= )
 	contribhdf? ( sci-libs/hdf5:= )
@@ -218,7 +216,7 @@ RDEPEND="
 		)
 	)
 	quirc? ( media-libs/quirc )
-	tesseract? ( app-text/tesseract[opencl=,${MULTILIB_USEDEP}] )
+	tesseract? ( app-text/tesseract[${MULTILIB_USEDEP}] )
 	tbb? ( dev-cpp/tbb:=[${MULTILIB_USEDEP}] )
 	tiff? ( media-libs/tiff:=[${MULTILIB_USEDEP}] )
 	v4l? ( >=media-libs/libv4l-0.8.3[${MULTILIB_USEDEP}] )
@@ -341,10 +339,6 @@ src_prepare() {
 		cd "${WORKDIR}/${PN}_contrib-${PV}" || die
 		eapply "${FILESDIR}/${PN}_contrib-4.8.1-rgbd.patch"
 		eapply "${FILESDIR}/${PN}_contrib-4.8.1-NVIDIAOpticalFlowSDK-2.0.tar.gz.patch"
-		if has_version ">=dev-util/nvidia-cuda-toolkit-12.4" && use cuda; then
-			# TODO https://github.com/NVIDIA/cccl/pull/1522
-			eapply "${FILESDIR}/${PN}_contrib-4.9.0-cuda-12.4.patch"
-		fi
 		cd "${S}" || die
 
 		! use contribcvv && { rm -R "${WORKDIR}/${PN}_contrib-${PV}/modules/cvv" || die; }
@@ -450,12 +444,13 @@ multilib_src_configure() {
 
 	# Optional 3rd party components
 	# ===================================================
-		-DENABLE_DOWNLOAD=yes
+		-DENABLE_DOWNLOAD=no
 		-DOPENCV_ENABLE_NONFREE="$(usex non-free)"
 		-DWITH_QUIRC="$(usex quirc)"
 		-DWITH_FLATBUFFERS="$(multilib_native_usex contribdnn)"
 		-DWITH_1394="$(usex ieee1394)"
 		# -DWITH_AVFOUNDATION="no" # IOS
+		-DWITH_AVIF=$(usex avif)
 		-DWITH_VTK="$(multilib_native_usex vtk)"
 		-DWITH_EIGEN="$(usex eigen)"
 		-DWITH_VFW="no" # Video windows support
@@ -505,7 +500,8 @@ multilib_src_configure() {
 		-DWITH_GDAL="$(multilib_native_usex gdal)"
 		-DWITH_GPHOTO2="$(usex gphoto2)"
 		-DWITH_LAPACK="$(multilib_native_usex lapack)"
-		-DWITH_ITT="no" # 3dparty libs itt_notify
+		-DWITH_ITT="no" # vendored ittnotify (Intel ITT)
+		-DWITH_ZLIB_NG="no" # vendored zlib-ng
 	# ===================================================
 	# CUDA build components: nvidia-cuda-toolkit
 	# ===================================================
@@ -684,11 +680,9 @@ multilib_src_configure() {
 
 	if multilib_is_native_abi && use cuda; then
 		cuda_add_sandbox -w
-		sandbox_write "/proc/self/task"
-		CUDAHOSTCXX="$(cuda_get_cuda_compiler)"
-		CUDAARCHS="$(cuda_get_host_native_arch)"
-		export CUDAHOSTCXX
-		export CUDAARCHS
+		export SANDBOX_WRITE="${SANDBOX_WRITE}:/proc/self/task"
+		export CUDAHOSTCXX="$(cuda_get_cuda_compiler)"
+		export CUDAARCHS="$(cuda_get_host_native_arch)"
 		mycmakeargs+=(
 			-DENABLE_CUDA_FIRST_CLASS_LANGUAGE="yes"
 		)
@@ -791,11 +785,8 @@ multilib_src_test() {
 		'AsyncAPICancelation/cancel*basic'
 	)
 
-	if ! use gtk && ! use qt5 && ! use qt6; then
-		CMAKE_SKIP_TESTS+=(
-			# these fail with parallism
-			'^Highgui_*'
-		)
+	if ! use gtk3 && ! use qt5 && ! use qt6; then
+		CMAKE_SKIP_TESTS+=( '^Highgui_*' )
 	fi
 
 	if multilib_is_native_abi && use cuda; then
