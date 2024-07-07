@@ -1,0 +1,48 @@
+# https://github.com/opencv/opencv/issues/21461
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1864,6 +1864,7 @@ if(WITH_CUDA OR HAVE_CUDA)
+   if(HAVE_CUDA)
+     status("    NVIDIA GPU arch:"      ${OPENCV_CUDA_ARCH_BIN})
+     status("    NVIDIA PTX archs:"     ${OPENCV_CUDA_ARCH_PTX})
++    status("    GPU supports FP16:"    HAVE_CUDA_FP16 THEN "YES" ELSE "NO")
+   endif()
+  endif()
+ 
+--- a/cmake/OpenCVDetectCUDALanguage.cmake
++++ b/cmake/OpenCVDetectCUDALanguage.cmake
+@@ -110,6 +110,11 @@ foreach(ARCH IN LISTS ARCH_LIST)
+   set(OPENCV_CUDA_ARCH_FEATURES "${OPENCV_CUDA_ARCH_FEATURES} ${ARCH}")
+ endforeach()
+ 
++string(STRIP "${OPENCV_CUDA_ARCH_BIN}" OPENCV_CUDA_ARCH_BIN)
++if(NOT OPENCV_CUDA_ARCH_BIN VERSION_LESS 53)
++  set(HAVE_CUDA_FP16 1)
++endif()
++
+ ocv_set_nvcc_threads_for_vs()
+ 
+ # These vars will be processed in other scripts
+--- a/cmake/templates/cvconfig.h.in
++++ b/cmake/templates/cvconfig.h.in
+@@ -30,6 +30,7 @@
+ 
+ /* NVIDIA CUDA Runtime API*/
+ #cmakedefine HAVE_CUDA
++#cmakedefine HAVE_CUDA_FP16
+ 
+ /* NVIDIA CUDA Basic Linear Algebra Subprograms (BLAS) API*/
+ #cmakedefine HAVE_CUBLAS
+--- a/modules/dnn/src/registry.cpp
++++ b/modules/dnn/src/registry.cpp
+@@ -121,7 +121,9 @@ private:
+         if (haveCUDA())
+         {
+             backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA));
++#ifdef HAVE_CUDA_FP16
+             backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA_FP16));
++#endif
+         }
+ #endif
+ 

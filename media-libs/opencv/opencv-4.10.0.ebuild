@@ -262,6 +262,8 @@ PATCHES=(
 	"${FILESDIR}/${PN}-4.9.0-drop-python2-detection.patch"
 	"${FILESDIR}/${PN}-4.9.0-ade-0.1.2d.tar.gz.patch"
 	"${FILESDIR}/${PN}-4.9.0-cmake-cleanup.patch"
+	"${FILESDIR}"/${P}-cuda-fp16.patch
+	"${FILESDIR}"/${P}-cudnn-9.patch
 
 	# TODO applied in src_prepare
 	# "${FILESDIR}/${PN}_contrib-${PV}-rgbd.patch"
@@ -680,11 +682,13 @@ multilib_src_configure() {
 
 	if multilib_is_native_abi && use cuda; then
 		cuda_add_sandbox -w
-		export SANDBOX_WRITE="${SANDBOX_WRITE}:/proc/self/task"
+		addwrite /proc/self/task
 		export CUDAHOSTCXX="$(cuda_get_cuda_compiler)"
 		export CUDAARCHS="$(cuda_get_host_native_arch)"
 		mycmakeargs+=(
 			-DENABLE_CUDA_FIRST_CLASS_LANGUAGE="yes"
+			-DCUDA_ARCH_BIN="${CUDAARCHS}"
+			-DCUDA_ARCH_PTX="${CUDAARCHS}"
 		)
 	fi
 
@@ -789,15 +793,6 @@ multilib_src_test() {
 		CMAKE_SKIP_TESTS+=( '^Highgui_*' )
 	fi
 
-	if multilib_is_native_abi && use cuda; then
-		CMAKE_SKIP_TESTS+=(
-			'CUDA_OptFlow/BroxOpticalFlow.Regression/0'
-			'CUDA_OptFlow/BroxOpticalFlow.OpticalFlowNan/0'
-			'CUDA_OptFlow/NvidiaOpticalFlow_1_0.Regression/0'
-			'CUDA_OptFlow/NvidiaOpticalFlow_2_0.Regression/0'
-		)
-	fi
-
 	if use opengl; then
 		CMAKE_SKIP_TESTS+=(
 			'OpenGL/Buffer.MapDevice/*'
@@ -817,8 +812,17 @@ multilib_src_test() {
 
 	if multilib_is_native_abi && use cuda; then
 		cuda_add_sandbox -w
+		addwrite /proc/self/task
 		export OPENCV_PARALLEL_BACKEND="threads"
 		export DNN_BACKEND_OPENCV="cuda"
+		CMAKE_SKIP_TESTS+=(
+			'CUDA_OptFlow/BroxOpticalFlow.Regression/0'
+			'CUDA_OptFlow/BroxOpticalFlow.OpticalFlowNan/0'
+			'CUDA_OptFlow/NvidiaOpticalFlow_1_0.Regression/0'
+			'CUDA_OptFlow/NvidiaOpticalFlow_1_0.OpticalFlowNan/0'
+			'CUDA_OptFlow/NvidiaOpticalFlow_2_0.Regression/0'
+			'CUDA_OptFlow/NvidiaOpticalFlow_2_0.OpticalFlowNan/0'
+		)
 	fi
 
 	opencv_test() {
