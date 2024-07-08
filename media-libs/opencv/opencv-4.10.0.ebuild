@@ -131,11 +131,6 @@ REQUIRED_USE="
 	test? ( || ( ffmpeg gstreamer ) jpeg png tiff features2d  )
 "
 
-# TODO find a way to compile these with the cuda compiler
-REQUIRED_USE+="
-	cuda? ( !gdal !openexr !tbb )
-"
-
 RESTRICT="!test? ( test )"
 
 RDEPEND="
@@ -270,35 +265,40 @@ PATCHES=(
 	# "${FILESDIR}/${PN}_contrib-4.8.1-NVIDIAOpticalFlowSDK-2.0.tar.gz.patch"
 )
 
-cuda_get_cuda_compiler() {
-	local compiler
-	tc-is-gcc && compiler="gcc"
-	tc-is-clang && compiler="clang"
-	[[ -z "$compiler" ]] && die "no compiler specified"
+cuda_get_host_compiler() {
+	local compiler=$(tc-get-compiler-type)
+	if ! (tc-is-gcc || tc-is-clang); then
+		die "${compiler} compiler is not supported"
+	fi
+	local default_compiler="${compiler}-$(${compiler}-major-version)"
+	local version="sys-devel/${compiler}"
 
-	local package="sys-devel/${compiler}"
-	local version="${package}"
-	local CUDAHOSTCXX_test
-	while
-		local CUDAHOSTCXX="${CUDAHOSTCXX_test}"
+	# try the default compiler first
+	local NVCC_CCBIN=${default_compiler}
+	while ! echo "int main(){}" | nvcc -ccbin "${NVCC_CCBIN}" - -x cu &>/dev/null; do
 		version=$(best_version "${version}")
 		if [[ -z "${version}" ]]; then
-			if [[ -z "${CUDAHOSTCXX}" ]]; then
-				die "could not find supported version of ${package}"
-			fi
-			break
+			die "could not find a supported version of ${compiler}"
 		fi
-		CUDAHOSTCXX_test="$(
-			dirname "$(
-				realpath "$(
-					which "${compiler}-$(echo "${version}" | grep -oP "(?<=${package}-)[0-9]*")"
-				)"
-			)"
-		)"
 		version="<${version}"
-	do ! echo "int main(){}" | nvcc "-ccbin ${CUDAHOSTCXX_test}" - -x cu &>/dev/null; done
 
-	echo "${CUDAHOSTCXX}"
+		# nvcc accepts just an executable name, too.
+		# search for NVCC_CCBIN here:
+		# https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/
+		NVCC_CCBIN="$(echo "${version}" | sed 's:.*/\([a-z]*-[0-9]*\).*:\1:')"
+	done
+
+	if [ ${NVCC_CCBIN} != ${default_compiler} ]; then
+		eerror "Compiler version mismatch causes undefined reference errors on linking."
+		if tc-is-gcc; then
+			eerror "Please switch using gcc-config to ${NVCC_CCBIN} which is supported."
+		else
+			eerror "Please switch to ${NVCC_CCBIN} which is supported."
+		fi
+		die "The default compiler, ${default_compiler} is not supported by nvcc!"
+	fi
+
+	echo "${default_compiler}"
 }
 
 cuda_get_host_native_arch() {
@@ -683,12 +683,19 @@ multilib_src_configure() {
 	if multilib_is_native_abi && use cuda; then
 		cuda_add_sandbox -w
 		addwrite /proc/self/task
-		export CUDAHOSTCXX="$(cuda_get_cuda_compiler)"
+
+		export CUDAHOSTCXX="$(cuda_get_host_compiler)"
 		export CUDAARCHS="$(cuda_get_host_native_arch)"
+
+		einfo "CUDAHOSTCXX: ${CUDAHOSTCXX}"
+		einfo "CUDAARCHS: ${CUDAARCHS}"
+		einfo "CUDA_ARCH_BIN: ${CUDA_ARCH_BIN}"
+		einfo "CUDA_ARCH_PTX: ${CUDA_ARCH_PTX}"
+
 		mycmakeargs+=(
 			-DENABLE_CUDA_FIRST_CLASS_LANGUAGE="yes"
-			-DCUDA_ARCH_BIN="${CUDAARCHS}"
-			-DCUDA_ARCH_PTX="${CUDAARCHS}"
+			-DCUDA_ARCH_BIN="${CUDA_ARCH_BIN:-${CUDAARCHS}}"
+			-DCUDA_ARCH_PTX="${CUDA_ARCH_PTX:-${CUDAARCHS}}"
 		)
 	fi
 
