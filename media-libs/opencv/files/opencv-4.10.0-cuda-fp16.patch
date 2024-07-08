@@ -1,48 +1,74 @@
 # https://github.com/opencv/opencv/issues/21461
+# https://github.com/opencv/opencv/pull/25880
 
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -1864,6 +1864,7 @@ if(WITH_CUDA OR HAVE_CUDA)
-   if(HAVE_CUDA)
-     status("    NVIDIA GPU arch:"      ${OPENCV_CUDA_ARCH_BIN})
-     status("    NVIDIA PTX archs:"     ${OPENCV_CUDA_ARCH_PTX})
-+    status("    GPU supports FP16:"    HAVE_CUDA_FP16 THEN "YES" ELSE "NO")
-   endif()
-  endif()
+Author: Aliaksei Urbanski <aliaksei.urbanski@gmail.com>
+Date:   Tue Jul 9 01:46:12 2024 +0300
+
+    🐛 Fix CUDA for old GPUs without FP16 support
+
+--- a/modules/dnn/src/cuda4dnn/init.hpp
++++ b/modules/dnn/src/cuda4dnn/init.hpp
+@@ -15,7 +15,7 @@
  
---- a/cmake/OpenCVDetectCUDALanguage.cmake
-+++ b/cmake/OpenCVDetectCUDALanguage.cmake
-@@ -110,6 +110,11 @@ foreach(ARCH IN LISTS ARCH_LIST)
-   set(OPENCV_CUDA_ARCH_FEATURES "${OPENCV_CUDA_ARCH_FEATURES} ${ARCH}")
- endforeach()
+ namespace cv { namespace dnn { namespace cuda4dnn {
  
-+string(STRIP "${OPENCV_CUDA_ARCH_BIN}" OPENCV_CUDA_ARCH_BIN)
-+if(NOT OPENCV_CUDA_ARCH_BIN VERSION_LESS 53)
-+  set(HAVE_CUDA_FP16 1)
-+endif()
-+
- ocv_set_nvcc_threads_for_vs()
+-    void checkVersions()
++    inline void checkVersions()
+     {
+         // https://docs.nvidia.com/deeplearning/cudnn/developer-guide/index.html#programming-model
+         // cuDNN API Compatibility
+@@ -44,19 +44,19 @@ namespace cv { namespace dnn { namespace cuda4dnn {
+         }
+     }
  
- # These vars will be processed in other scripts
---- a/cmake/templates/cvconfig.h.in
-+++ b/cmake/templates/cvconfig.h.in
-@@ -30,6 +30,7 @@
+-    int getDeviceCount()
++    inline int getDeviceCount()
+     {
+         return cuda::getCudaEnabledDeviceCount();
+     }
  
- /* NVIDIA CUDA Runtime API*/
- #cmakedefine HAVE_CUDA
-+#cmakedefine HAVE_CUDA_FP16
+-    int getDevice()
++    inline int getDevice()
+     {
+         int device_id = -1;
+         CUDA4DNN_CHECK_CUDA(cudaGetDevice(&device_id));
+         return device_id;
+     }
  
- /* NVIDIA CUDA Basic Linear Algebra Subprograms (BLAS) API*/
- #cmakedefine HAVE_CUBLAS
+-    bool isDeviceCompatible()
++    inline bool isDeviceCompatible()
+     {
+         int device_id = getDevice();
+         if (device_id < 0)
+@@ -76,7 +76,7 @@ namespace cv { namespace dnn { namespace cuda4dnn {
+         return false;
+     }
+ 
+-    bool doesDeviceSupportFP16()
++    inline bool doesDeviceSupportFP16()
+     {
+         int device_id = getDevice();
+         if (device_id < 0)
 --- a/modules/dnn/src/registry.cpp
 +++ b/modules/dnn/src/registry.cpp
-@@ -121,7 +121,9 @@ private:
+@@ -18,6 +18,10 @@
+ #include "backend.hpp"
+ #include "factory.hpp"
+ 
++#ifdef HAVE_CUDA
++#include "cuda4dnn/init.hpp"
++#endif
++
+ namespace cv {
+ namespace dnn {
+ CV__DNN_INLINE_NS_BEGIN
+@@ -121,7 +125,8 @@ private:
          if (haveCUDA())
          {
              backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA));
-+#ifdef HAVE_CUDA_FP16
-             backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA_FP16));
-+#endif
+-            backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA_FP16));
++            if (cuda4dnn::doesDeviceSupportFP16())
++                backends.push_back(std::make_pair(DNN_BACKEND_CUDA, DNN_TARGET_CUDA_FP16));
          }
  #endif
  
