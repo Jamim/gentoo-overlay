@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<maintainer type="project">
-		<email>dev-portage@gentoo.org</email>
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
+	<use>
+		<flag name="video">Allow access to GPU during tests run</flag>
+	</use>
 </pkgmetadata>
