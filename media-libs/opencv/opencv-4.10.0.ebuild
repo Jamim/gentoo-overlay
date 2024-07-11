@@ -133,7 +133,7 @@ REQUIRED_USE="
 
 RESTRICT="!test? ( test )"
 
-RDEPEND="
+COMMON_DEPEND="
 	avif? ( media-libs/libavif:=[${MULTILIB_USEDEP}] )
 	app-arch/bzip2[${MULTILIB_USEDEP}]
 	dev-libs/protobuf:=[${MULTILIB_USEDEP}]
@@ -164,7 +164,6 @@ RDEPEND="
 		media-libs/libdc1394:=[${MULTILIB_USEDEP}]
 		sys-libs/libraw1394[${MULTILIB_USEDEP}]
 	)
-	java? ( >=virtual/jre-1.8:* )
 	jpeg? ( media-libs/libjpeg-turbo:=[${MULTILIB_USEDEP}] )
 	jpeg2k? (
 		jasper? ( media-libs/jasper:= )
@@ -220,8 +219,12 @@ RDEPEND="
 	webp? ( media-libs/libwebp:=[${MULTILIB_USEDEP}] )
 	xine? ( media-libs/xine-lib )
 "
+RDEPEND="
+	${COMMON_DEPEND}
+	java? ( >=virtual/jre-1.8:* )
+"
 DEPEND="
-	${RDEPEND}
+	${COMMON_DEPEND}
 	eigen? ( >=dev-cpp/eigen-3.3.8-r1:3 )
 	java? ( >=virtual/jdk-1.8:* )
 "
