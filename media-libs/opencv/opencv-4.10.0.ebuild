@@ -293,16 +293,12 @@ cuda_get_host_compiler() {
 	done
 
 	if [ ${NVCC_CCBIN} != ${default_compiler} ]; then
-		eerror "Compiler version mismatch causes undefined reference errors on linking."
-		if tc-is-gcc; then
-			eerror "Please switch using gcc-config to ${NVCC_CCBIN} which is supported."
-		else
-			eerror "Please switch to ${NVCC_CCBIN} which is supported."
-		fi
-		die "The default compiler, ${default_compiler} is not supported by nvcc!"
+		ewarn "The default compiler, ${default_compiler} is not supported by nvcc!"
+		ewarn "Compiler version mismatch causes undefined reference errors on linking, so"
+		ewarn "${NVCC_CCBIN}, which is supported by nvcc, will be used to compile OpenCV."
 	fi
 
-	echo "${default_compiler}"
+	echo "${NVCC_CCBIN}"
 }
 
 cuda_get_host_native_arch() {
@@ -690,6 +686,8 @@ multilib_src_configure() {
 
 		export CUDAHOSTCXX="$(cuda_get_host_compiler)"
 		export CUDAARCHS="$(cuda_get_host_native_arch)"
+		export CXX="${CUDAHOSTCXX/gcc/g++}"
+		export CC="${CUDAHOSTCXX}"
 
 		einfo "CUDAHOSTCXX: ${CUDAHOSTCXX}"
 		einfo "CUDAARCHS: ${CUDAARCHS}"
