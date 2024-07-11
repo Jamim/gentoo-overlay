@@ -302,7 +302,9 @@ cuda_get_host_compiler() {
 }
 
 cuda_get_host_native_arch() {
-	: "${CUDAARCHS:=$(__nvcc_device_query)}"
+	# __nvcc_device_query might fail sporadically,
+	# so a retry is needed for redundancy
+	: "${CUDAARCHS:=$(__nvcc_device_query || __nvcc_device_query || die 'Failed to get CUDA host native arch')}"
 	echo "${CUDAARCHS}"
 }
 
