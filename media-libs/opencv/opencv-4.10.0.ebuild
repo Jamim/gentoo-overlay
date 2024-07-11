@@ -228,6 +228,7 @@ DEPEND="
 # TODO gstreamer dependencies
 DEPEND+="
 	test? (
+		cuda? ( acct-user/portage[video] )
 		gstreamer? (
 			media-plugins/gst-plugins-jpeg[${MULTILIB_USEDEP}]
 			media-plugins/gst-plugins-x264[${MULTILIB_USEDEP}]
