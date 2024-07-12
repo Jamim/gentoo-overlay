@@ -3,14 +3,14 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..12} )
+PYTHON_COMPAT=( python3_{10..13} )
 PYTHON_REQ_USE="ssl(+)"
 DISTUTILS_USE_PEP517=setuptools
 
 inherit bash-completion-r1 distutils-r1
 
 DESCRIPTION="Modern command line HTTP client"
-HOMEPAGE="https://httpie.io/ https://pypi.org/project/httpie/"
+HOMEPAGE="https://httpie.io https://github.com/httpie/cli https://pypi.org/project/httpie/"
 SRC_URI="https://github.com/httpie/cli/archive/${PV}.tar.gz -> ${P}.gh.tar.gz"
 S="${WORKDIR}/cli-${PV}"
 
