@@ -26,8 +26,7 @@ LICENSE="GPL-2 LGPL-2.1"
 SLOT="0"
 IUSE="cdr dia exif graphicsmagick imagemagick inkjar jpeg openmp postscript readline sourceview spell svg2 test visio wpg X"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
-# Lots of test failures which need investigating, bug #871621
-RESTRICT="!test? ( test ) test"
+RESTRICT="!test? ( test )"
 
 BDEPEND="
 	dev-util/glib-utils
@@ -176,21 +175,17 @@ src_configure() {
 
 src_test() {
 	CMAKE_SKIP_TESTS=(
-		# render_text*: needs patched Cairo / maybe upstream changes
-		# not yet in a release.
 		# test_lpe/test_lpe64: precision differences b/c of new GCC?
 		# cli_export-png-color-mode-gray-8_png_check_output: ditto?
-		render_test-use
-		render_test-glyph-y-pos
-		render_text-glyphs-combining
-		render_text-glyphs-vertical
-		render_test-rtl-vertical
+		cli_convert-text-paintorder_check_output
+		cli_export-png-color-mode-gray-8_png_check_output
+		cli_export-text-paintorder_check_output
+		cli_pdfinput-font-spacing_check_output
+		cli_pdfinput-font-style_check_output
 		test_lpe
 		test_lpe64
-		cli_export-png-color-mode-gray-8_png_check_output
 	)
 
-	# bug #871621
 	cmake_src_compile tests
 	cmake_src_test -j1
 }
