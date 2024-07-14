@@ -8,11 +8,10 @@ inherit autotools flag-o-matic toolchain-funcs
 DESCRIPTION="The GNU Scientific Library"
 HOMEPAGE="https://www.gnu.org/software/gsl/"
 SRC_URI="mirror://gnu/${PN}/${P}.tar.gz
-	https://dev.gentoo.org/~sam/distfiles/${CATEGORY}/${PN}/${PN}-2.7-cblas.patch.bz2"
+	https://github.com/Jamim/${PN}/commit/${P//./%2E}-cblas.patch -> ${P}-cblas.patch"
 
 LICENSE="GPL-3+"
-# Usually 0/${PV} but check
-SLOT="0/27"
+SLOT="0/$(ver_cut 1-2)"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux"
 IUSE="cblas-external +deprecated static-libs"
 
@@ -21,9 +20,9 @@ DEPEND="${RDEPEND}"
 BDEPEND="virtual/pkgconfig"
 
 PATCHES=(
-	"${WORKDIR}"/${PN}-2.7-cblas.patch
-	"${FILESDIR}"/${PN}-2.7.1-configure-clang16.patch
+	"${DISTDIR}"/${P}-cblas.patch
 	"${FILESDIR}"/${PN}-2.7.1-test-tolerance.patch
+	"${FILESDIR}"/${PN}-drop-broken-rng-tests.patch
 )
 
 src_prepare() {
@@ -38,6 +37,10 @@ src_prepare() {
 
 src_configure() {
 	filter-flags -ffast-math
+
+	# with -ffp-contract=fast tests are broken beyond repair
+	# which indicates that GSL might produce inaccurate values
+	append-flags -ffp-contract=off
 
 	if use cblas-external; then
 		export CBLAS_LIBS="$($(tc-getPKG_CONFIG) --libs cblas)"
