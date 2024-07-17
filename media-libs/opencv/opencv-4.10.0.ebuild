@@ -303,24 +303,33 @@ cuda_get_host_compiler() {
 
 cuda_get_host_native_arch() {
 	# __nvcc_device_query might fail sporadically,
-	# so a retry is needed for redundancy
-	: "${CUDAARCHS:=$(__nvcc_device_query || __nvcc_device_query || die 'Failed to get CUDA host native arch')}"
-	echo "${CUDAARCHS}"
+	# so a retry is needed for safety
+	local native_arch="$(__nvcc_device_query || __nvcc_device_query)"
+	if [[ -z "${native_arch}" ]]; then
+		ewarn "Failed to get host's native CUDA architecture!"
+		ewarn "CUDA_ARCH_BIN might be miscalculated by OpenCV's CMake scripts,"
+		ewarn "so to be safe, set CUDAARCHS or CUDA_ARCH_BIN in your make.conf."
+	fi
+	echo "${native_arch}"
 }
 
 pkg_pretend() {
-	if use cuda && [[ -z "${CUDA_GENERATION}" ]] && [[ -z "${CUDA_ARCH_BIN}" ]]; then # TODO CUDAARCHS
-		einfo "The target CUDA architecture can be set via one of:"
-		einfo "  - CUDA_GENERATION set to one of Maxwell, Pascal, Volta, Turing, Ampere, Lovelace, Hopper, Auto"
-		einfo "  - CUDA_ARCH_BIN, (and optionally CUDA_ARCH_PTX) in the form of x.y tuples."
-		einfo "      You can specify multiple tuple separated by \";\"."
+	if use cuda && [[ -z "${CUDAARCHS}" ]] && [[ -z "${CUDA_GENERATION}" ]] && [[ -z "${CUDA_ARCH_BIN}" ]]; then
+		einfo "The target CUDA architecture can be set via one of these variables in make.conf:"
+		einfo "  - CUDAARCHS (prefered)"
+		einfo "    https://cmake.org/cmake/help/latest/envvar/CUDAARCHS.html"
+		einfo "      a semicolon-separated list of architectures, e.g. \"35;50;72\","
+		einfo "      as described in https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html"
+		einfo "  - CUDA_ARCH_BIN (and optionally CUDA_ARCH_PTX)"
+		einfo "    https://docs.opencv.org/4.x/db/d05/tutorial_config_reference.html#autotoc_md898"
+		einfo "      a semicolon-separated list of architectures, e.g. \"3.5;5.0;7.2\""
+		einfo "  - CUDA_GENERATION (NOT recommended, might cause miscalculation):"
+		einfo "    https://docs.opencv.org/4.x/db/d05/tutorial_config_reference.html#autotoc_md898"
+		einfo "      one of Maxwell, Pascal, Volta, Turing, Ampere, Lovelace, Hopper, Auto"
 		einfo ""
 		einfo "The CUDA architecture tuple for your device can be found at https://developer.nvidia.com/cuda-gpus."
-	fi
-
-	if use cuda && [[ ${MERGE_TYPE} == "buildonly" ]] && [[ -n "${CUDA_GENERATION}" || -n "${CUDA_ARCH_BIN}" ]]; then
-		local info_message="When building a binary package it's recommended to unset CUDA_GENERATION and CUDA_ARCH_BIN"
-		einfo "$info_message so all available architectures are build."
+		einfo ""
+		einfo "Since none of them are set, CUDAARCHS will be calculated automatically."
 	fi
 
 	[[ ${MERGE_TYPE} != binary ]] && use openmp && tc-check-openmp
@@ -687,20 +696,44 @@ multilib_src_configure() {
 		addwrite /proc/self/task
 
 		export CUDAHOSTCXX="$(cuda_get_host_compiler)"
-		export CUDAARCHS="$(cuda_get_host_native_arch)"
 		export CXX="${CUDAHOSTCXX/gcc/g++}"
 		export CC="${CUDAHOSTCXX}"
 
+		if [[ -z "${CUDAARCHS}" ]]; then
+			# CUDAARCHS must be set in order to prevent possible miscalculation and
+			# overriding of CUDA_ARCH_BIN and CUDA_ARCH_PTX by OpenCV's CMake scripts
+			# due to https://github.com/opencv/opencv/issues/25920
+			if [[ -n "${CUDA_ARCH_BIN}" ]]; then
+				export CUDAARCHS="${CUDA_ARCH_BIN//./}"
+			else
+				export CUDAARCHS="$(cuda_get_host_native_arch)"
+			fi
+		fi
+
 		einfo "CUDAHOSTCXX: ${CUDAHOSTCXX}"
 		einfo "CUDAARCHS: ${CUDAARCHS}"
-		einfo "CUDA_ARCH_BIN: ${CUDA_ARCH_BIN}"
-		einfo "CUDA_ARCH_PTX: ${CUDA_ARCH_PTX}"
+		einfo "CUDA_ARCH_BIN: ${CUDA_ARCH_BIN:=${CUDAARCHS}}"
+		einfo "CUDA_ARCH_PTX: ${CUDA_ARCH_PTX:=${CUDAARCHS}}"
+		einfo "CUDA_GENERATION: ${CUDA_GENERATION}"
+
+		# WARNING: there is a bug that makes CMake to igore
+		# CUDA_ARCH_BIN/PTX and CUDA_GENERATION options in case
+		# the ENABLE_CUDA_FIRST_CLASS_LANGUAGE is set to "yes"
+		# https://github.com/opencv/opencv/issues/25920
+		# So the configuration below is broken at the moment.
+		# Please rely on the CUDAARCHS env variable for now!
 
 		mycmakeargs+=(
 			-DENABLE_CUDA_FIRST_CLASS_LANGUAGE="yes"
-			-DCUDA_ARCH_BIN="${CUDA_ARCH_BIN:-${CUDAARCHS}}"
-			-DCUDA_ARCH_PTX="${CUDA_ARCH_PTX:-${CUDAARCHS}}"
+			-DCUDA_ARCH_BIN="${CUDA_ARCH_BIN}"
+			-DCUDA_ARCH_PTX="${CUDA_ARCH_PTX}"
 		)
+
+		if [[ -n "${CUDA_GENERATION}" ]]; then
+			mycmakeargs+=(
+				-DCUDA_GENERATION="${CUDA_GENERATION}"
+			)
+		fi
 	fi
 
 	if use ffmpeg; then
