@@ -79,10 +79,6 @@ multilib_src_configure() {
 	local myconf=(
 		--disable-opencl
 
-		# netloc is deprecated upstream, about to be removed
-		# bug #796797
-		--disable-netloc
-
 		--disable-plugin-ltdl
 		--enable-plugins
 		--enable-shared

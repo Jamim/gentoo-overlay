@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<maintainer type="project">
-		<email>cluster@gentoo.org</email>
-		<name>Gentoo Cluster Project</name>
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<longdescription> 
 	The Portable Hardware Locality (hwloc) software package provides a portable abstraction 
@@ -17,17 +17,16 @@
 		<flag name="cairo">Enable the Cairo back-end of hwloc's lstopo command</flag>
 		<flag name="cpuid">Enable the cpuid-based architecture specific support (x86 component)</flag>
 		<flag name="cuda">Enable CUDA device discovery using libcudart</flag>
-		<flag name="gl">Enable GL display device discovery (NVCtrl)</flag> 
 		<flag name="l0">Enable oneAPI Level Zero device discovery</flag>
-		<flag name="numa">Add support for numa memory allocation</flag>
 		<flag name="nvml">Enable the NVML device discovery</flag>
 		<flag name="pci">Enable PCI device discovery using libpci</flag>
-		<flag name="plugins">Build hwloc components as plugins so that the hwloc core library does not directly depend on their dependencies (for instance the libpci library)</flag>
 		<flag name="rocm">Enable AMD RSMI device discovery</flag>
 		<flag name="xml">use libxml2 for XML support, instead of a custom minimalistic support</flag>
 		<flag name="X">use the X Window System</flag>
 	</use>
 	<upstream>
+		<doc>https://www.open-mpi.org/projects/hwloc/doc/</doc>
+		<bugs-to>https://github.com/open-mpi/hwloc/issues</bugs-to>
 		<remote-id type="github">open-mpi/hwloc</remote-id>
 	</upstream>
 </pkgmetadata>
