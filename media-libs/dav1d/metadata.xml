@@ -2,7 +2,8 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>lu_zero@gentoo.org</email>
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<use>
 		<flag name="8bit">Add support for decoding 8-bit AV1.</flag>
