@@ -1,0 +1,94 @@
+# https://github.com/AOMediaCodec/libavif/issues/2258
+# https://github.com/AOMediaCodec/libavif/pull/2263
+# https://github.com/AOMediaCodec/libavif/commit/7adf4073
+
+Author: Vincent Rabaud <vrabaud@google.com>
+Date: Fri, 12 Jul 2024 15:41:26 +0200
+Subject: Rename Googletest to GTest (#2263)
+
+This is to get -DAVIF_GTEST=SYSTEM working.
+- rename Googletest to GTest which is the proper way to find gtest
+- use GTest::GTest and GTest::Main instead of Gtest::gtest and
+  Gtest::gtest_main to work with older CMake (CMake 3.20 added the
+  new convention)
+
+--- a/cmake/Modules/LocalGoogletest.cmake
++++ b/cmake/Modules/LocalGTest.cmake
+@@ -11,17 +11,17 @@ set(GTEST_MAIN_LIB_FILENAME
+ if(EXISTS ${GTEST_INCLUDE_DIRS}/gtest/gtest.h AND EXISTS ${GTEST_LIB_FILENAME} AND EXISTS ${GTEST_MAIN_LIB_FILENAME})
+     message(STATUS "libavif(AVIF_GTEST=LOCAL): compiled library found in ext/googletest")
+ 
+-    add_library(GTest::gtest STATIC IMPORTED)
+-    set_target_properties(GTest::gtest PROPERTIES IMPORTED_LOCATION "${GTEST_LIB_FILENAME}" AVIF_LOCAL ON)
++    add_library(GTest::GTest STATIC IMPORTED)
++    set_target_properties(GTest::GTest PROPERTIES IMPORTED_LOCATION "${GTEST_LIB_FILENAME}" AVIF_LOCAL ON)
+ 
+     if(TARGET Threads::Threads)
+-        target_link_libraries(GTest::gtest INTERFACE Threads::Threads)
++        target_link_libraries(GTest::GTest INTERFACE Threads::Threads)
+     endif()
+-    target_include_directories(GTest::gtest INTERFACE "${GTEST_INCLUDE_DIRS}")
++    target_include_directories(GTest::GTest INTERFACE "${GTEST_INCLUDE_DIRS}")
+ 
+-    add_library(GTest::gtest_main STATIC IMPORTED)
+-    target_link_libraries(GTest::gtest_main INTERFACE GTest::gtest)
+-    set_target_properties(GTest::gtest_main PROPERTIES IMPORTED_LOCATION "${GTEST_MAIN_LIB_FILENAME}" AVIF_LOCAL ON)
++    add_library(GTest::Main STATIC IMPORTED)
++    target_link_libraries(GTest::Main INTERFACE GTest::GTest)
++    set_target_properties(GTest::Main PROPERTIES IMPORTED_LOCATION "${GTEST_MAIN_LIB_FILENAME}" AVIF_LOCAL ON)
+ else()
+     message(STATUS "libavif(AVIF_GTEST=LOCAL): compiled library not found in ext/googletest; using FetchContent")
+     if(EXISTS "${AVIF_SOURCE_DIR}/ext/googletest")
+@@ -45,8 +45,8 @@ else()
+ 
+     set_target_properties(gtest gtest_main PROPERTIES AVIF_LOCAL ON)
+ 
+-    add_library(GTest::gtest ALIAS gtest)
+-    add_library(GTest::gtest_main ALIAS gtest_main)
++    add_library(GTest::GTest ALIAS gtest)
++    add_library(GTest::Main ALIAS gtest_main)
+ 
+     message(CHECK_PASS "complete")
+ endif()
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -63,33 +63,33 @@ add_test(NAME repro_avif_decode_fuzzer COMMAND repro_avif_decode_fuzzer
+ # are considered as extra linked libraries.
+ macro(add_avif_gtest TEST_NAME)
+     add_executable(${TEST_NAME} gtest/${TEST_NAME}.cc)
+-    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers GTest::gtest GTest::gtest_main ${ARGN})
++    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers GTest::GTest GTest::Main ${ARGN})
+     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+     register_test_for_coverage(${TEST_NAME})
+ endmacro()
+ macro(add_avif_internal_gtest TEST_NAME)
+     add_executable(${TEST_NAME} gtest/${TEST_NAME}.cc)
+-    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers_internal GTest::gtest GTest::gtest_main ${ARGN})
++    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers_internal GTest::GTest GTest::Main ${ARGN})
+     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+     register_test_for_coverage(${TEST_NAME})
+ endmacro()
+ macro(add_avif_gtest_with_data TEST_NAME)
+     add_executable(${TEST_NAME} gtest/${TEST_NAME}.cc)
+-    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers GTest::gtest ${ARGN})
++    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers GTest::GTest ${ARGN})
+     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data/)
+     register_test_for_coverage(${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data/)
+ endmacro()
+ macro(add_avif_internal_gtest_with_data TEST_NAME)
+     add_executable(${TEST_NAME} gtest/${TEST_NAME}.cc)
+-    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers_internal GTest::gtest ${ARGN})
++    target_link_libraries(${TEST_NAME} PRIVATE aviftest_helpers_internal GTest::GTest ${ARGN})
+     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data/)
+     register_test_for_coverage(${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data/)
+ endmacro()
+ 
+ if(AVIF_ENABLE_GTEST)
+-    check_avif_option(AVIF_GTEST TARGET GTest::gtest PKG_NAME Googletest)
++    check_avif_option(AVIF_GTEST TARGET GTest::GTest PKG_NAME GTest)
+     add_library(avifincrtest_helpers OBJECT gtest/avifincrtest_helpers.cc)
+-    target_link_libraries(avifincrtest_helpers avif_internal GTest::gtest)
++    target_link_libraries(avifincrtest_helpers avif_internal GTest::GTest)
+ endif()
+ 
+ if(AVIF_ENABLE_GTEST)

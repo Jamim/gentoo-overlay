@@ -40,16 +40,24 @@ BDEPEND="
 	virtual/pkgconfig
 "
 
+PATCHES=(
+	"${FILESDIR}"/${P}-gtest.patch
+	"${FILESDIR}"/${P}-test-cmd-icc-profile.patch
+)
+
 multilib_src_configure() {
 	local mycmakeargs=(
 		-DBUILD_SHARED_LIBS=ON
-		-DAVIF_CODEC_AOM=$(usex aom ON OFF)
-		-DAVIF_CODEC_DAV1D=$(usex dav1d ON OFF)
 		-DAVIF_CODEC_LIBGAV1=OFF
 
+		# bug 916948
+		-DAVIF_LIBYUV=OFF
+
 		# Use system libraries.
-		-DAVIF_LOCAL_ZLIBPNG=OFF
-		-DAVIF_LOCAL_JPEG=OFF
+		-DAVIF_CODEC_AOM=$(usex aom SYSTEM OFF)
+		-DAVIF_CODEC_DAV1D=$(usex dav1d SYSTEM OFF)
+		-DAVIF_ZLIBPNG=SYSTEM
+		-DAVIF_JPEG=SYSTEM
 
 		-DAVIF_BUILD_GDK_PIXBUF=$(usex gdk-pixbuf ON OFF)
 
@@ -58,13 +66,14 @@ multilib_src_configure() {
 
 	if multilib_is_native_abi; then
 		mycmakeargs+=(
-			-DAVIF_CODEC_RAV1E=$(usex rav1e ON OFF)
-			-DAVIF_CODEC_SVT=$(usex svt-av1 ON OFF)
+			-DAVIF_CODEC_RAV1E=$(usex rav1e SYSTEM OFF)
+			-DAVIF_CODEC_SVT=$(usex svt-av1 SYSTEM OFF)
 
 			-DAVIF_BUILD_EXAMPLES=$(usex examples ON OFF)
 			-DAVIF_BUILD_APPS=$(usex extras ON OFF)
 			-DAVIF_BUILD_TESTS=$(usex test ON OFF)
 			-DAVIF_ENABLE_GTEST=$(usex extras $(usex test ON OFF) OFF)
+			-DAVIF_GTEST=$(usex extras $(usex test SYSTEM OFF) OFF)
 		)
 	else
 		mycmakeargs+=(
@@ -75,6 +84,7 @@ multilib_src_configure() {
 			-DAVIF_BUILD_APPS=OFF
 			-DAVIF_BUILD_TESTS=OFF
 			-DAVIF_ENABLE_GTEST=OFF
+			-DAVIF_GTEST=OFF
 		)
 
 		if ! use aom ; then
