@@ -47,6 +47,7 @@ BDEPEND="
 
 PATCHES=(
 	"${FILESDIR}"/${P}-gtest.patch
+	"${FILESDIR}"/${P}-tests-cxx.patch
 )
 
 multilib_src_configure() {
