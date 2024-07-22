@@ -25,7 +25,12 @@ DEPEND="
 	media-libs/libpng:=[${MULTILIB_USEDEP}]
 	aom? ( >=media-libs/libaom-3.3.0:=[${MULTILIB_USEDEP}] )
 	dav1d? ( >=media-libs/dav1d-1.0.0:=[${MULTILIB_USEDEP}] )
-	extras? ( test? ( dev-cpp/gtest ) )
+	extras? (
+		test? (
+			dev-cpp/gtest
+			media-gfx/imagemagick[lcms]
+		)
+	)
 	gdk-pixbuf? (
 		dev-libs/glib:2[${MULTILIB_USEDEP}]
 		x11-libs/gdk-pixbuf:2[${MULTILIB_USEDEP}]
@@ -42,7 +47,6 @@ BDEPEND="
 
 PATCHES=(
 	"${FILESDIR}"/${P}-gtest.patch
-	"${FILESDIR}"/${P}-test-cmd-icc-profile.patch
 )
 
 multilib_src_configure() {
