@@ -6,6 +6,9 @@ EAPI=8
 QA_PKGCONFIG_VERSION=$(ver_cut 1-3)
 inherit autotools flag-o-matic perl-functions toolchain-funcs
 
+DESCRIPTION="A collection of tools and libraries for many image formats"
+HOMEPAGE="https://imagemagick.org/"
+
 if [[ ${PV} == 9999 ]] ; then
 	EGIT_REPO_URI="https://github.com/ImageMagick/ImageMagick.git"
 	inherit git-r3
@@ -14,13 +17,10 @@ else
 	MY_PV="$(ver_rs 3 '-')"
 	MY_P="ImageMagick-${MY_PV}"
 	SRC_URI="mirror://imagemagick/${MY_P}.tar.xz"
-	KEYWORDS="~alpha amd64 arm arm64 hppa ~ia64 ~loong ~m68k ~mips ppc ppc64 ~riscv ~s390 sparc x86 ~amd64-linux ~x86-linux ~arm64-macos ~ppc-macos ~x64-macos ~x64-solaris"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~arm64-macos ~ppc-macos ~x64-macos ~x64-solaris"
 fi
 
 S="${WORKDIR}/${MY_P}"
-
-DESCRIPTION="A collection of tools and libraries for many image formats"
-HOMEPAGE="https://www.imagemagick.org/"
 
 LICENSE="imagemagick"
 # Please check this on bumps, SONAME is often not updated! Use abidiff on old/new.
@@ -109,22 +109,9 @@ src_prepare() {
 	# For testsuite, see https://bugs.gentoo.org/show_bug.cgi?id=500580#c3
 	local ati_cards mesa_cards nvidia_cards render_cards
 	shopt -s nullglob
-	ati_cards=$(echo -n /dev/ati/card* | sed 's/ /:/g')
-	if test -n "${ati_cards}"; then
-		addpredict "${ati_cards}"
-	fi
-	mesa_cards=$(echo -n /dev/dri/card* | sed 's/ /:/g')
-	if test -n "${mesa_cards}"; then
-		addpredict "${mesa_cards}"
-	fi
-	nvidia_cards=$(echo -n /dev/nvidia* | sed 's/ /:/g')
-	if test -n "${nvidia_cards}"; then
-		addpredict "${nvidia_cards}"
-	fi
-	render_cards=$(echo -n /dev/dri/renderD128* | sed 's/ /:/g')
-	if test -n "${render_cards}"; then
-		addpredict "${render_cards}"
-	fi
+	for card in /dev/{{ati,dri}/card,nvidia,dri/renderD128}*; do
+		addpredict "${card}"
+	done
 	shopt -u nullglob
 	addpredict /dev/nvidiactl
 }
@@ -133,8 +120,6 @@ src_configure() {
 	local depth=16
 	use q8 && depth=8
 	use q32 && depth=32
-
-	use perl && perl_check_env
 
 	[[ ${CHOST} == *-solaris* ]] && append-ldflags -lnsl -lsocket
 
@@ -148,7 +133,6 @@ src_configure() {
 		--with-quantum-depth=${depth}
 		$(use_with cxx magick-plus-plus)
 		$(use_with perl)
-		--with-perl-options='INSTALLDIRS=vendor'
 		--with-gs-font-dir="${EPREFIX}"/usr/share/fonts/urw-fonts
 		$(use_with bzip2 bzlib)
 		$(use_with X x)
@@ -192,6 +176,17 @@ src_configure() {
 		--with-security-policy=$(usex hardened limited open)
 	)
 
+	if use perl; then
+		perl_check_env
+		perl_set_version
+		local perl_options=(
+			INSTALLDIRS=vendor
+			INSTALLVENDORARCH="\"${VENDOR_ARCH}\""
+			INSTALLVENDORMAN3DIR="\"${EPREFIX}/usr/share/man/man3\""
+		)
+		myeconfargs+=( --with-perl-options="${perl_options[*]}" )
+	fi
+
 	CONFIG_SHELL="${BROOT}"/bin/bash econf "${myeconfargs[@]}"
 }
 
@@ -226,8 +221,8 @@ src_install() {
 		DOCUMENTATION_PATH="${EPREFIX}"/usr/share/doc/${PF}/html \
 		install
 
-	rm -f "${ED}"/usr/share/doc/${PF}/html/{ChangeLog,LICENSE,NEWS.txt}
-	dodoc {AUTHORS,README}.txt
+	rm -f "${ED}"/usr/share/doc/${PF}/html/LICENSE
+	dodoc AUTHORS.txt README.md
 
 	if use perl; then
 		find "${ED}" -type f -name perllocal.pod -exec rm -f {} +
