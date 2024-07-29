@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<maintainer type="project">
-		<email>qt@gentoo.org</email>
-		<name>Gentoo Qt Project</name>
+	<maintainer type="person">
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<use>
 		<flag name="designer">Install the QWebEngineView plugin used to add widgets in <pkg>dev-qt/designer</pkg> forms that display web pages.</flag>
@@ -11,6 +11,7 @@
 		<flag name="pdfium">Build the QtPdf module based on chromium's PDFium library</flag>
 		<flag name="qml">Build QML/QtQuick bindings and imports</flag>
 		<flag name="system-icu">Use the system-wide <pkg>dev-libs/icu</pkg> instead of bundled.</flag>
+		<flag name="system-re2">Use the system-wide <pkg>dev-libs/re2</pkg> instead of bundled.</flag>
 		<flag name="webdriver">Build tool for automated testing (ChromeDriver equivalent)</flag>
 		<flag name="widgets">Enable QtWidgets support</flag>
 	</use>

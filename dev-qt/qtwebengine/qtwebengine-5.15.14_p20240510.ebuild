@@ -29,7 +29,7 @@ fi
 
 SRC_URI+=" https://dev.gentoo.org/~asturm/distfiles/${PATCHSET}.tar.xz"
 
-IUSE="alsa bindist designer geolocation +jumbo-build kerberos pulseaudio screencast +system-icu widgets"
+IUSE="alsa bindist designer geolocation +jumbo-build kerberos pulseaudio screencast +system-icu system-re2 widgets"
 REQUIRED_USE="designer? ( widgets )"
 
 RDEPEND="
@@ -41,7 +41,6 @@ RDEPEND="
 	dev-libs/libevent:=
 	dev-libs/libxml2[icu]
 	dev-libs/libxslt
-	dev-libs/re2:=
 	=dev-qt/qtcore-${QT5_PV}*
 	=dev-qt/qtdeclarative-${QT5_PV}*
 	=dev-qt/qtgui-${QT5_PV}*
@@ -81,6 +80,7 @@ RDEPEND="
 	pulseaudio? ( media-libs/libpulse )
 	screencast? ( media-video/pipewire:= )
 	system-icu? ( >=dev-libs/icu-69.1:= )
+	system-re2? ( <=dev-libs/re2-0.2022.12.01:= )
 	widgets? (
 		=dev-qt/qtdeclarative-${QT5_PV}*[widgets]
 		=dev-qt/qtwidgets-${QT5_PV}*
@@ -102,6 +102,7 @@ BDEPEND="${PYTHON_DEPS}
 PATCHES=(
 	"${WORKDIR}/${PATCHSET}"
 	"${FILESDIR}/${PN}-5.15.13_p20240510-gcc15.patch"
+	"${FILESDIR}/${P}-re2.patch"
 )
 
 python_check_deps() {
@@ -231,6 +232,7 @@ src_configure() {
 		$(usex screencast -webengine-webrtc-pipewire '')
 		-qt-ffmpeg # bug 831487
 		$(qt_use system-icu webengine-icu)
+		$(qt_use system-re2 webengine-re2)
 	)
 	qt5-build_src_configure
 }
