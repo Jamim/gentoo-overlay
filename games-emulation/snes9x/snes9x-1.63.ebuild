@@ -1,16 +1,16 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..12} )
+PYTHON_COMPAT=( python3_{10..13} )
 inherit autotools cmake flag-o-matic python-any-r1 toolchain-funcs xdg
 
 # TODO: try unbundling, albeit compatibility with (and between) these
 # tend to be volatile and it may not be the best idea "yet"
-HASH_GLSLANG=6d41bb9c557c5a0eec61ffba1f775dc5f717a8f7
-HASH_SPIRV=4e2fdb25671c742a9fbe93a6034eb1542244c7e1
-HASH_VULKAN=a3dd2655a3a68c2a67c55a0f8b77dcb8b166ada2
+HASH_GLSLANG=9c7fd1a33e5cecbe465e1cd70170167d5e40d398
+HASH_SPIRV=bccaa94db814af33d8ef05c153e7c34d8bd4d685
+HASH_VULKAN=577baa05033cf1d9236b3d078ca4b3269ed87a2b
 
 DESCRIPTION="Super Nintendo Entertainment System (SNES) emulator"
 HOMEPAGE="https://github.com/snes9xgit/snes9x/"
@@ -68,7 +68,7 @@ BDEPEND="
 PATCHES=(
 	"${FILESDIR}"/${PN}-1.62.1-flags.patch
 	"${FILESDIR}"/${PN}-1.62.1-gcc13.patch
-	"${FILESDIR}"/${PN}-1.62.1-optional-wayland.patch
+	"${FILESDIR}"/${P}-optional-wayland.patch
 )
 
 pkg_setup() {

@@ -1,0 +1,22 @@
+USE_SLANG currently disregards whether USE_WAYLAND was used or not
+and leads to trying to use wayland headers that may be missing.
+--- a/gtk/CMakeLists.txt
++++ b/gtk/CMakeLists.txt
+@@ -105,7 +105,6 @@
+     list(APPEND INCLUDES "../external/glslang")
+ 
+     list(APPEND DEFINES "VK_USE_PLATFORM_XLIB_KHR"
+-                        "VK_USE_PLATFORM_WAYLAND_KHR"
+                         "VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
+                         "VULKAN_HPP_NO_NODISCARD_WARNINGS=1"
+                         "VULKAN_HPP_NO_EXCEPTIONS=1"
+@@ -153,7 +152,8 @@
+ 
+ if(USE_WAYLAND)
+     pkg_check_modules(WAYLAND REQUIRED wayland-client wayland-egl)
+-    list(APPEND DEFINES "USE_WAYLAND")
++    list(APPEND DEFINES "USE_WAYLAND"
++                        "VK_USE_PLATFORM_WAYLAND_KHR")
+     list(APPEND SOURCES ../common/video/wayland_egl_context.cpp
+                         ../common/video/wayland_egl_context.hpp
+                         ../common/video/wayland_surface.cpp
