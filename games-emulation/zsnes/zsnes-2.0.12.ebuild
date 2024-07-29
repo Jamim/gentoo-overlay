@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit desktop flag-o-matic multilib toolchain-funcs xdg-utils
+inherit desktop flag-o-matic multilib toolchain-funcs xdg
 
 DESCRIPTION="Fork of the classic Super Nintendo emulator"
 HOMEPAGE="https://github.com/xyproto/zsnes/ https://www.zsnes.com/"
@@ -63,14 +63,4 @@ src_install() {
 
 	newicon icons/64x64x32.png ${PN}.png
 	make_desktop_entry ${PN} ${PN^^}
-}
-
-pkg_postinst() {
-	xdg_icon_cache_update
-	xdg_desktop_database_update
-}
-
-pkg_postrm() {
-	xdg_icon_cache_update
-	xdg_desktop_database_update
 }
