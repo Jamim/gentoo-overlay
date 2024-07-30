@@ -225,13 +225,16 @@ src_install() {
 	dodoc AUTHORS.txt README.md
 
 	if use perl; then
-		find "${ED}" -type f -name perllocal.pod -exec rm -f {} +
-		find "${ED}" -depth -mindepth 1 -type d -empty -exec rm -rf {} +
+		find "${ED}" -type f -name perllocal.pod -exec rm -f {} + || die
+		find "${ED}" -depth -mindepth 1 -type d -empty -exec rm -rf {} + || die
 	fi
 
-	find "${ED}" -name '*.la' -exec sed -i -e "/^dependency_libs/s:=.*:='':" {} +
 	# .la files in parent are not needed, keep plugin .la files
 	find "${ED}"/usr/$(get_libdir)/ -maxdepth 1 -name "*.la" -delete || die
+
+	# not sure whether it's still necessary, please see
+	# https://github.com/gentoo/gentoo/pull/37716#discussion_r1696713348
+	find "${ED}" -name '*.la' -exec sed -i -e "/^dependency_libs/s:=.*:='':" {} + || die
 
 	if use opencl; then
 		cat <<-EOF > "${T}"/99${PN}
