@@ -2,12 +2,8 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="person">
-		<email>prometheanfire@gentoo.org</email>
-		<name>Matthew Thode</name>
-	</maintainer>
-	<maintainer type="person" proxied="yes">
-		<email>speedjack95@gmail.com</email>
-		<name>Niccolò Scatena</name>
+		<email>aliaksei.urbanski@gmail.com</email>
+		<name>Aliaksei Urbanski</name>
 	</maintainer>
 	<longdescription lang="en">
 		Sway's wallpaper utility, compatible with any Wayland compositor
