@@ -45,11 +45,6 @@ BDEPEND="
 	virtual/pkgconfig
 "
 
-PATCHES=(
-	"${FILESDIR}"/${P}-gtest.patch
-	"${FILESDIR}"/${P}-tests-cxx.patch
-)
-
 multilib_src_configure() {
 	local mycmakeargs=(
 		-DBUILD_SHARED_LIBS=ON
