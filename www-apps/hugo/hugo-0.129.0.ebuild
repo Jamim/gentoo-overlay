@@ -3,13 +3,13 @@
 
 EAPI=8
 
-inherit go-module shell-completion
+inherit check-reqs go-module shell-completion
 
 DESCRIPTION="Fast static HTML and CSS website generator"
 HOMEPAGE="https://gohugo.io https://github.com/gohugoio/hugo"
 SRC_URI="
 	https://github.com/gohugoio/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
-	https://gentoo.aur.im/distfiles/${P}-vendor.tar.xz
+	https://tastytea.de/files/gentoo/${P}-vendor.tar.xz
 "
 
 # NOTE: To create the vendor tarball, run:
@@ -25,7 +25,6 @@ BDEPEND="
 	test? (
 		dev-python/docutils
 		dev-ruby/asciidoctor
-		virtual/pandoc
 	)
 "
 RDEPEND="
@@ -40,8 +39,29 @@ RESTRICT="!test? ( test )"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.121.0-unbundle-libwebp-and-libsass.patch
-	"${FILESDIR}"/${PN}-0.123.0-skip-some-tests.patch
+	"${FILESDIR}"/${PN}-0.128.0-skip-some-tests.patch
 )
+
+_check_reqs() {
+	if [[ ${MERGE_TYPE} == binary ]] ; then
+		return 0
+	fi
+
+	if has test ${FEATURES}; then
+		CHECKREQS_DISK_BUILD="4G"
+	else
+		CHECKREQS_DISK_BUILD="1500M"
+	fi
+	check-reqs_${EBUILD_PHASE_FUNC}
+}
+
+pkg_pretend() {
+	_check_reqs
+}
+
+pkg_setup() {
+	_check_reqs
+}
 
 src_configure() {
 	export CGO_ENABLED=1
@@ -79,6 +99,10 @@ src_compile() {
 }
 
 src_test() {
+	if ! has_version -b virtual/pandoc ; then
+		elog "You're missing virtual/pandoc - some tests will be skipped."
+	fi
+
 	ego test "./..." ${MY_BUILD_FLAGS}
 }
 

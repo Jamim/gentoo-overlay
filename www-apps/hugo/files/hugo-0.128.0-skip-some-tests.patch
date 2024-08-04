@@ -1,4 +1,4 @@
-From 1a3938e8c133573f35abe58edd42204575aeffeb Mon Sep 17 00:00:00 2001
+From 890a1842ce705c56f71ea661d0d0be43e11d5df1 Mon Sep 17 00:00:00 2001
 From: tastytea <tastytea@tastytea.de>
 Date: Fri, 8 Sep 2023 20:01:03 +0200
 Subject: [PATCH] skip some tests
@@ -7,16 +7,30 @@ reasons:
   - needs to be in a git repo
   - needs special test dependencies
   - requires network access
+  - is time sensitive
 ---
+ common/para/para_test.go                                      | 1 +
  modules/client_test.go                                        | 4 ++++
  .../resource_factories/create/create_integration_test.go      | 1 +
- 2 files changed, 5 insertions(+)
+ 3 files changed, 6 insertions(+)
 
+diff --git a/common/para/para_test.go b/common/para/para_test.go
+index 2d9188e..daf0560 100644
+--- a/common/para/para_test.go
++++ b/common/para/para_test.go
+@@ -69,6 +69,7 @@ func TestPara(t *testing.T) {
+ 	})
+ 
+ 	c.Run("Time", func(c *qt.C) {
++        c.Skip("time sensitive")
+ 		const n = 100
+ 
+ 		p := New(5)
 diff --git a/modules/client_test.go b/modules/client_test.go
-index ea910580f..b957ba984 100644
+index 0ee7e0d..4bb8843 100644
 --- a/modules/client_test.go
 +++ b/modules/client_test.go
-@@ -68,6 +68,7 @@ github.com/gohugoio/hugoTestModules1_darwin/modh2_2@v1.4.0 github.com/gohugoio/h
+@@ -72,6 +72,7 @@ github.com/gohugoio/hugoTestModules1_darwin/modh2_2@v1.4.0 github.com/gohugoio/h
  	}
  
  	c.Run("All", func(c *qt.C) {
@@ -24,7 +38,7 @@ index ea910580f..b957ba984 100644
  		client, clean := newClient(c, func(cfg *ClientConfig) {
  			cfg.ModuleConfig = DefaultModuleConfig
  		}, defaultImport)
-@@ -107,6 +108,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
+@@ -111,6 +112,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
  	})
  
  	c.Run("IgnoreVendor", func(c *qt.C) {
@@ -32,7 +46,7 @@ index ea910580f..b957ba984 100644
  		client, clean := newClient(
  			c, func(cfg *ClientConfig) {
  				cfg.ModuleConfig = DefaultModuleConfig
-@@ -125,6 +127,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
+@@ -129,6 +131,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
  	})
  
  	c.Run("NoVendor", func(c *qt.C) {
@@ -40,7 +54,7 @@ index ea910580f..b957ba984 100644
  		mcfg := DefaultModuleConfig
  		mcfg.NoVendor = "**"
  		client, clean := newClient(
-@@ -144,6 +147,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
+@@ -148,6 +151,7 @@ project github.com/gohugoio/hugoTestModules1_darwin/modh2_2_2@v1.3.0+vendor
  	})
  
  	c.Run("VendorClosest", func(c *qt.C) {
@@ -49,7 +63,7 @@ index ea910580f..b957ba984 100644
  		mcfg.VendorClosest = true
  
 diff --git a/resources/resource_factories/create/create_integration_test.go b/resources/resource_factories/create/create_integration_test.go
-index 61bc17adb..13cd6f33f 100644
+index 1708457..e81f4de 100644
 --- a/resources/resource_factories/create/create_integration_test.go
 +++ b/resources/resource_factories/create/create_integration_test.go
 @@ -25,6 +25,7 @@ import (
@@ -61,5 +75,5 @@ index 61bc17adb..13cd6f33f 100644
  -- config.toml --
  [security]
 -- 
-2.43.0
+2.44.2
 
