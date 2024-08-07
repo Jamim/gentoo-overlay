@@ -70,7 +70,7 @@ src_install() {
 	done
 	newicon -s scalable assets/logo-only.svg ${PN}.svg
 
-	systemd_dounit etc/linux-systemd/system/${PN}{@,-resume}.service
+	systemd_dounit etc/linux-systemd/system/${PN}@.service
 	systemd_douserunit etc/linux-systemd/user/${PN}.service
 	newconfd "${FILESDIR}"/${PN}.confd ${PN}
 	newinitd "${FILESDIR}"/${PN}.initd-r2 ${PN}
