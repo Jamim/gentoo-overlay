@@ -27,7 +27,7 @@ CRATES="
 	block@0.1.6
 	bstr@1.9.0
 	bumpalo@3.14.0
-	bytemuck@1.14.2
+	bytemuck@1.16.3
 	byteorder@1.5.0
 	cairo-rs@0.19.1
 	cairo-sys-rs@0.19.1
@@ -46,7 +46,6 @@ CRATES="
 	clap_lex@0.6.0
 	color_quant@1.1.0
 	colorchoice@1.0.0
-	const-cstr@0.3.0
 	core-foundation-sys@0.8.6
 	crc32fast@1.3.2
 	criterion-plot@0.5.0
@@ -230,8 +229,8 @@ CRATES="
 	thiserror@1.0.56
 	tiff@0.9.1
 	time-core@0.1.2
-	time-macros@0.2.17
-	time@0.3.34
+	time-macros@0.2.18
+	time@0.3.36
 	tinytemplate@1.2.1
 	tinyvec@1.6.0
 	tinyvec_macros@0.1.1
@@ -284,7 +283,7 @@ CRATES="
 	windows_x86_64_msvc@0.52.0
 	winnow@0.5.39
 	xml5ever@0.17.0
-	yeslogic-fontconfig-sys@4.0.1
+	yeslogic-fontconfig-sys@5.0.0
 	zune-inflate@0.2.54
 "
 
@@ -340,6 +339,10 @@ QA_FLAGS_IGNORED="
 	usr/bin/rsvg-convert
 	usr/lib.*/librsvg.*
 "
+
+PATCHES=(
+	"${FILESDIR}"/${P}-time.patch
+)
 
 src_prepare() {
 	use vala && vala_setup
