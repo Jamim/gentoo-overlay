@@ -4,7 +4,7 @@
 EAPI=8
 
 PYTHON_COMPAT=( python3_{10..13} )
-inherit cuda java-pkg-opt-2 java-ant-2 cmake-multilib flag-o-matic python-r1 toolchain-funcs virtualx
+inherit cuda java-pkg-opt-2 cmake-multilib flag-o-matic python-r1 toolchain-funcs virtualx
 
 DESCRIPTION="A collection of algorithms and sample code for various computer vision problems"
 HOMEPAGE="https://opencv.org"
@@ -219,10 +219,6 @@ COMMON_DEPEND="
 	webp? ( media-libs/libwebp:=[${MULTILIB_USEDEP}] )
 	xine? ( media-libs/xine-lib )
 "
-RDEPEND="
-	${COMMON_DEPEND}
-	java? ( >=virtual/jre-1.8:* )
-"
 DEPEND="
 	${COMMON_DEPEND}
 	eigen? ( >=dev-cpp/eigen-3.3.8-r1:3 )
@@ -238,6 +234,10 @@ DEPEND+="
 		)
 	)
 "
+RDEPEND="
+	${COMMON_DEPEND}
+	java? ( >=virtual/jre-1.8:* )
+"
 BDEPEND="
 	virtual/pkgconfig
 	cuda? ( dev-util/nvidia-cuda-toolkit:0= )
@@ -247,6 +247,7 @@ BDEPEND="
 			dev-python/beautifulsoup4[${PYTHON_USEDEP}]
 		)
 	)
+	java? ( >=dev-java/ant-1.10.14-r3 )
 "
 
 PATCHES=(
@@ -436,9 +437,10 @@ src_prepare() {
 	if use java; then
 		java-pkg-opt-2_src_prepare
 
-		JAVA_ANT_ENCODING="iso-8859-1"
 		# set encoding so even this cmake build will pick it up.
 		export ANT_OPTS+=" -Dfile.encoding=iso-8859-1"
+		export ANT_OPTS+=" -Dant.build.javac.source=$(java-pkg_get-source)"
+		export ANT_OPTS+=" -Dant.build.javac.target=$(java-pkg_get-target)"
 	fi
 }
 
@@ -742,6 +744,14 @@ multilib_src_configure() {
 		)
 	fi
 
+	# according to modules/java/jar/CMakeLists.txt:23-26
+	if use java; then
+		mycmakeargs+=(
+			-DOPENCV_JAVA_SOURCE_VERSION="$(java-pkg_get-source)"
+			-DOPENCV_JAVA_TARGET_VERSION="$(java-pkg_get-target)"
+		)
+	fi
+
 	if use mkl; then
 		mycmakeargs+=(
 			-DLAPACK_IMPL="MKL"
@@ -809,7 +819,6 @@ multilib_src_configure() {
 		)
 		cmake_src_configure
 	fi
-	use java && java-ant-2_src_configure
 }
 
 multilib_src_compile() {
