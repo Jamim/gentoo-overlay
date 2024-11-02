@@ -18,7 +18,6 @@ IUSE="test"
 RESTRICT="!test? ( test )"
 
 # header only library
-RDEPEND=""
 DEPEND="test? ( >=dev-cpp/gtest-1.9.0_pre20190607 )"
 
 PATCHES=(
