@@ -85,7 +85,7 @@ RDEPEND="${CDEPEND}
 "
 DEPEND="${CDEPEND}
 	>=dev-cpp/cppgir-2.0_p20240315
-	>=dev-cpp/ms-gsl-4
+	>=dev-cpp/ms-gsl-4.1.0
 	dev-cpp/expected-lite
 	dev-cpp/range-v3
 "
