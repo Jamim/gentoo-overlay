@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -12,7 +12,7 @@ SRC_URI="https://people.freedesktop.org/~hughsient/${PN}/releases/${P}.tar.xz"
 LICENSE="LGPL-2.1+"
 SLOT="0/8" # soname version
 KEYWORDS="~alpha amd64 arm arm64 ~hppa ~loong ppc ppc64 ~riscv ~s390 sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x64-solaris"
-IUSE="gtk-doc fonts +introspection stemmer"
+IUSE="gtk-doc fonts +introspection"
 
 RDEPEND="
 	>=dev-libs/glib-2.58.0:2
@@ -28,7 +28,6 @@ RDEPEND="
 	)
 	>=media-libs/fontconfig-2.11:1.0
 	dev-libs/libyaml
-	stemmer? ( dev-libs/snowball-stemmer:= )
 	x11-libs/pango
 	introspection? ( >=dev-libs/gobject-introspection-1.54:= )
 "
@@ -54,7 +53,6 @@ src_configure() {
 		-Drpm=false
 		-Dalpm=false
 		$(meson_use fonts)
-		$(meson_use stemmer)
 		-Dman=true
 		$(meson_use gtk-doc)
 		$(meson_use introspection)
