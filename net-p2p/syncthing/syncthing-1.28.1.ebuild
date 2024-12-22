@@ -28,7 +28,7 @@ DOCS=( README.md AUTHORS CONTRIBUTING.md )
 PATCHES=(
 	"${FILESDIR}"/${PN}-1.3.4-TestIssue5063_timeout.patch
 	"${FILESDIR}"/${PN}-1.18.4-tool_users.patch
-	"${FILESDIR}"/${PN}-1.23.2-tests_race.patch
+	"${FILESDIR}"/${PN}-1.28.2-tests_race.patch
 )
 
 src_prepare() {

@@ -6,10 +6,10 @@
  	"time"
 -
 -	buildpkg "github.com/syncthing/syncthing/lib/build"
+ 	"github.com/syncthing/syncthing/lib/upgrade"
+ 	"sigs.k8s.io/yaml"
  )
- 
- var (
-@@ -409,13 +409,6 @@
+@@ -414,13 +412,6 @@
  	}
  	args = append(args, "-timeout", timeout)
  
