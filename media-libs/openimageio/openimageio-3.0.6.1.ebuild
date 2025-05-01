@@ -1,13 +1,13 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..13} )
+PYTHON_COMPAT=( python3_{11..13} )
 
-TEST_OIIO_IMAGE_COMMIT="aae37a54e31c0e719edcec852994d052ecf6541e"
-TEST_OEXR_IMAGE_COMMIT="df16e765fee28a947244657cae3251959ae63c00"
-inherit cmake flag-o-matic font python-single-r1 virtualx
+TEST_OIIO_IMAGE_COMMIT="75099275c73a6937d40c69f9e14a006aa49fa201"
+TEST_OEXR_IMAGE_COMMIT="d45a2d5a890d6963b94479c7a644440068c37dd2"
+inherit cuda cmake flag-o-matic python-single-r1
 
 DESCRIPTION="A library for reading and writing images"
 HOMEPAGE="https://sites.google.com/site/openimageio/ https://github.com/AcademySoftwareFoundation/OpenImageIO"
@@ -43,16 +43,23 @@ SLOT="0/$(ver_cut 1-2)"
 KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~riscv"
 
 X86_CPU_FEATURES=(
-	aes:aes sse2:sse2 sse3:sse3 ssse3:ssse3 sse4_1:sse4.1 sse4_2:sse4.2
-	avx:avx avx2:avx2 avx512f:avx512f f16c:f16c
+	aes:aes
+	sse2:sse2
+	sse3:sse3
+	ssse3:ssse3
+	sse4_1:sse4.1
+	sse4_2:sse4.2
+	avx:avx
+	avx2:avx2
+	avx512f:avx512f
+	f16c:f16c
 )
 CPU_FEATURES=( "${X86_CPU_FEATURES[@]/#/cpu_flags_x86_}" )
 
-IUSE="dicom doc ffmpeg fits gif gui jpeg2k opencv openvdb ptex python qt6 raw test +tools +truetype ${CPU_FEATURES[*]%:*}"
-REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} ) gui? ( tools ) test? ( tools )"
+IUSE="cuda dicom doc ffmpeg fits gif gui jpeg2k opencv openvdb ptex python raw test +tools +truetype ${CPU_FEATURES[*]%:*}"
+REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} ) gui? ( tools ) test? ( tools truetype )"
 
-# Not quite working yet
-RESTRICT="!test? ( test )" # test"
+RESTRICT="!test? ( test )"
 
 BDEPEND="
 	jpeg2k? ( app-arch/unzip )
@@ -65,25 +72,24 @@ BDEPEND="
 		dev-texlive/texlive-latexextra
 	)
 "
+
+# misses cmake files
+# 	media-libs/libwebp:=
 RDEPEND="
-	dev-libs/boost:=
 	dev-cpp/robin-map
-	dev-libs/libfmt:=
-	dev-libs/pugixml:=
-	>=media-libs/libheif-1.13.0:=
+	dev-libs/pugixml
+	media-libs/libheif:=
 	media-libs/libjpeg-turbo:=
-	media-libs/libpng:0=
-	>=media-libs/libwebp-0.2.1:=
-	>=dev-libs/imath-3.1.2-r4:=
-	>=media-libs/opencolorio-2.1.1-r4:=
-	>=media-libs/openexr-3:0=
+	media-libs/libpng:=
+	media-libs/opencolorio:=
+	media-libs/openexr:=
 	media-libs/tiff:=
 	sys-libs/zlib:=
 	dicom? ( sci-libs/dcmtk )
 	ffmpeg? ( media-video/ffmpeg:= )
 	fits? ( sci-libs/cfitsio:= )
-	gif? ( media-libs/giflib:0= )
-	jpeg2k? ( >=media-libs/openjpeg-2.0:2= )
+	gif? ( media-libs/giflib:= )
+	jpeg2k? ( media-libs/openjpeg:= )
 	opencv? ( media-libs/opencv:= )
 	openvdb? (
 		dev-cpp/tbb:=
@@ -93,28 +99,22 @@ RDEPEND="
 	python? (
 		${PYTHON_DEPS}
 		$(python_gen_cond_dep '
-			dev-libs/boost:=[python,${PYTHON_USEDEP}]
 			dev-python/numpy[${PYTHON_USEDEP}]
 			dev-python/pybind11[${PYTHON_USEDEP}]
 		')
 	)
 	gui? (
 		media-libs/libglvnd
-		!qt6? (
-			dev-qt/qtcore:5
-			dev-qt/qtgui:5
-			dev-qt/qtopengl:5
-			dev-qt/qtwidgets:5
-		)
-		qt6? (
-			dev-qt/qtbase:6[gui,widgets,opengl]
-		)
+		dev-qt/qtbase:6[gui,widgets,opengl]
 	)
 	raw? ( media-libs/libraw:= )
-	truetype? ( media-libs/freetype:2= )
+	truetype? ( media-libs/freetype )
 "
 DEPEND="
+	dev-libs/imath:=
+	dev-libs/libfmt:=
 	${RDEPEND}
+	test? ( media-fonts/droid )
 "
 
 DOCS=(
@@ -124,9 +124,9 @@ DOCS=(
 )
 
 PATCHES=(
-	"${FILESDIR}/${PN}-2.5.8.0-fits.patch"
-	"${FILESDIR}/${PN}-2.5.8.0-fix-unit_simd.patch"
 	"${FILESDIR}/${PN}-2.5.8.0-fix-tests.patch"
+	"${FILESDIR}/${PN}-2.5.12.0-heif-find-fix.patch"
+	"${FILESDIR}/${PN}-2.5.18.0-tests-optional.patch"
 )
 
 pkg_setup() {
@@ -135,18 +135,46 @@ pkg_setup() {
 
 src_prepare() {
 	if ! use dicom; then
-		rm -r "${S}/src/dicom.imageio/" || die
+		rm "src/dicom.imageio" -r || die
+	fi
+
+	if ! use gif; then
+		rm src/gif.imageio -r || die
+	fi
+
+	if ! use jpeg2k; then
+		rm src/jpeg2000.imageio -r || die
+	fi
+
+	if ! use raw; then
+		rm src/raw.imageio -r || die
 	fi
 
 	cmake_src_prepare
 	cmake_comment_add_subdirectory src/fonts
 
 	if use test ; then
-		mv -v "${WORKDIR}/OpenImageIO-images-${TEST_OIIO_IMAGE_COMMIT}" "${WORKDIR}/oiio-images" || die
-		mv -v "${WORKDIR}/openexr-images-${TEST_OEXR_IMAGE_COMMIT}" "${WORKDIR}/openexr-images" || die
-		if use jpeg2k; then
-			mv -v "${WORKDIR}/J2KP4files" "${WORKDIR}/j2kp4files_v1_5" || die
+		ln -s "${WORKDIR}/OpenImageIO-images-${TEST_OIIO_IMAGE_COMMIT}" "${WORKDIR}/oiio-images" || die
+		ln -s "${WORKDIR}/openexr-images-${TEST_OEXR_IMAGE_COMMIT}" "${WORKDIR}/openexr-images" || die
+
+		if use fits; then
+			mkdir -p "${WORKDIR}/fits-images/"{ftt4b,pg93} || die
+			for a in ${A}; do
+				if [[ "${a}" == file*.fits ]]; then
+					ln -s "${DISTDIR}/${a}" "${WORKDIR}/fits-images/ftt4b/" || die
+				fi
+				if [[ "${a}" == tst*.fits ]]; then
+					ln -s "${DISTDIR}/${a}" "${WORKDIR}/fits-images/pg93/" || die
+				fi
+			done
 		fi
+
+		if use jpeg2k; then
+			ln -s "${WORKDIR}/J2KP4files" "${WORKDIR}/j2kp4files_v1_5" || die
+		fi
+
+		cp testsuite/heif/ref/out-libheif1.1{2,5}-orient.txt || die
+		eapply "${FILESDIR}/${PN}-2.5.12.0_heif_test.patch"
 	fi
 }
 
@@ -166,54 +194,70 @@ src_configure() {
 	use arm64 && append-flags -flax-vector-conversions
 
 	local mycmakeargs=(
+		-DVERBOSE="no"
+
+		# -DALWAYS_PREFER_CONFIG="yes"
+		# -DGLIBCXX_USE_CXX11_ABI="yes"
+		# -DTEX_BATCH_SIZE="8" # TODO AVX512 -> 16
+		-DSTOP_ON_WARNING="no"
+
 		-DCMAKE_CXX_STANDARD="17"
 		-DDOWNSTREAM_CXX_STANDARD="17"
 
-		-DCMAKE_UNITY_BUILD_MODE="BATCH"
-		-DUNITY_SMALL_BATCH_SIZE="$(nproc)"
+		-DCMAKE_UNITY_BUILD=OFF
+		# -DCMAKE_UNITY_BUILD_MODE="BATCH"
+		# -DUNITY_SMALL_BATCH_SIZE="$(nproc)"
+
+		-DBUILD_DOCS="$(usex doc)"
+		# -DBUILD_OIIOUTIL_ONLY="no"
+		-DBUILD_TESTING="$(usex test)"
+
+		-DINSTALL_FONTS="no"
+		-DINSTALL_DOCS="$(usex doc)"
+
+		-DENABLE_DCMTK="$(usex dicom)"
+		-DENABLE_FFmpeg="$(usex ffmpeg)"
+		-DENABLE_FITS="$(usex fits)"
+		-DENABLE_FREETYPE="$(usex truetype)"
+		-DENABLE_GIF="$(usex gif)"
+		-DENABLE_LibRaw="$(usex raw)"
+		-DENABLE_Nuke="no" # not in Gentoo
+		-DENABLE_OpenCV="$(usex opencv)"
+		-DENABLE_OpenJPEG="$(usex jpeg2k)"
+		-DENABLE_OpenVDB="$(usex openvdb)"
+		-DENABLE_TBB="$(usex openvdb)"
+		-DENABLE_Ptex="$(usex ptex)"
+
+		-DENABLE_GIF="$(usex gif)"
+		-DENABLE_LIBRAW="$(usex raw)"
+		-DENABLE_PTEX="$(usex ptex)"
+		-DENABLE_OPENJPEG="$(usex jpeg2k)"
+
+		-DENABLE_libuhdr="no" # not in Gentoo
+		-DENABLE_WebP="no" # missing cmake files
 
 		-DOIIO_BUILD_TOOLS="$(usex tools)"
 		-DOIIO_BUILD_TESTS="$(usex test)"
-		-DOIIO_DOWNLOAD_MISSING_TESTDATA="OFF"
+		-DOIIO_DOWNLOAD_MISSING_TESTDATA="no"
+		-DOIIO_USE_CUDA="$(usex cuda)"
 
-		-DBUILD_TESTING="$(usex test)"
-		-DBUILD_DOCS="$(usex doc)"
-
-		-DINSTALL_FONTS="OFF"
-		-DINSTALL_DOCS="$(usex doc)"
-		-DSTOP_ON_WARNING="OFF"
-		-DUSE_CCACHE="OFF"
-
-		-DUSE_EXTERNAL_PUGIXML="ON"
-
-		-DENABLE_DCMTK="$(usex dicom)"
-		-DENABLE_FFMPEG="$(usex ffmpeg)"
-		-DENABLE_GIF="$(usex gif)"
-		-DENABLE_NUKE="OFF" # not in Gentoo
-		-DENABLE_OPENJPEG="$(usex jpeg2k)"
-		-DENABLE_OPENCV="$(usex opencv)"
-		-DENABLE_OPENVDB="$(usex openvdb)"
-		-DENABLE_PTEX="$(usex ptex)"
+		-DUSE_CCACHE="no"
+		-DUSE_EXTERNAL_PUGIXML="yes"
+		# -DUSE_LIBCPLUSPLUS="yes"
+		-DUSE_R3DSDK="no" # not in Gentoo
 		-DUSE_PYTHON="$(usex python)"
-		-DENABLE_LIBRAW="$(usex raw)"
-		-DENABLE_FREETYPE="$(usex truetype)"
-
 		-DUSE_SIMD="$(local IFS=','; echo "${mysimd[*]}")"
-
-		-DVERBOSE="yes"
-		-DENABLE_FITS="$(usex fits)"
-
-	)
+)
 
 	if use gui; then
-		mycmakeargs+=( -DENABLE_IV=ON -DUSE_OPENGL=ON -DUSE_QT=ON )
-		if ! use qt6; then
-			mycmakeargs+=( -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON )
-		fi
+		mycmakeargs+=(
+			-DUSE_IV="yes"
+			-DUSE_OPENGL="yes"
+			-DUSE_QT="yes"
+		)
 	else
 		mycmakeargs+=(
-			# -DENABLE_IV=OFF
-			-DUSE_QT=OFF
+			-DUSE_QT="no"
 		)
 	fi
 
@@ -232,31 +276,63 @@ src_test() {
 	# So install them into the image directory now.
 	DESTDIR="${T}" cmake_build install
 
+	if use cuda; then
+		cuda_add_sandbox -w
+		addpredict "/dev/char/"
+	fi
+
 	CMAKE_SKIP_TESTS=(
 		"-broken$"
+		"texture-levels-stochaniso.batch"
+
+		"^docs-examples-cpp$"
+		"^docs-examples-python$"
+		"^python-imagebufalgo$"
+
+		"^oiiotool-text$"
+		"^bmp$"
+		"^dds$"
+		"^ico$"
+		"^jpeg2000$"
+		"^psd$"
+		"^ptex$"
+
+		"^tiff-depths" # TODO float errors
+		"^tiff-suite" # TODO missing compression
 	)
 
 	sed -e "s#../../../testsuite#../../../OpenImageIO-${PV}/testsuite#g" \
 		-i "${CMAKE_USE_DIR}/testsuite/python-imagebufalgo/ref/out.txt" || die
 
+	# NOTE src/build-scripts/ci-startup.bash
 	local -x CI CMAKE_PREFIX_PATH LD_LIBRARY_PATH OPENIMAGEIO_FONTS PYTHONPATH
 	CI=true
+	local -x OpenImageIO_CI=true
+	# local -x OIIO_USE_CUDA=0
 	CMAKE_PREFIX_PATH="${T}/usr"
 	LD_LIBRARY_PATH="${T}/usr/$(get_libdir)"
-	OPENIMAGEIO_FONTS="${CMAKE_USE_DIR}/src/fonts"
+	# local -x OPENIMAGEIO_DEBUG_FILE
+	local -x OPENIMAGEIO_DEBUG=0
 
 	if use python; then
 		PYTHONPATH="${T}$(python_get_sitedir)"
 	fi
 
-	virtx cmake_src_test
+	myctestargs=(
+		--output-on-failure
+	)
+
+	cmake_src_test
 
 	# Clean up the image directory for src_install
 	rm -fr "${T:?}"/usr || die
 }
 
 src_install() {
-	# NOTE both eclasses export src_install so we ran both by hand.
-	font_src_install
 	cmake_src_install
+
+	# remove Windows loader file
+	if use python; then
+		rm "${D}$(python_get_sitedir)/__init__.py" || die
+	fi
 }
