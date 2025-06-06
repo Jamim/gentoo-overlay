@@ -22,8 +22,8 @@ LICENSE="
 	extras? ( MIT )
 "
 # See bug #822336 re subslot
-SLOT="0/16.1.1"
-KEYWORDS="~alpha amd64 arm arm64 ~hppa ~loong ~mips ppc64 ~riscv ~sparc x86"
+SLOT="0/16.3.0"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~loong ~mips ~ppc64 ~riscv ~sparc ~x86"
 IUSE="+aom dav1d examples extras gdk-pixbuf rav1e svt-av1 libyuv test"
 RESTRICT="!test? ( test )"
 REQUIRED_USE="|| ( aom dav1d )"
