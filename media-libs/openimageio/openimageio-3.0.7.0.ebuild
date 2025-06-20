@@ -6,7 +6,7 @@ EAPI=8
 PYTHON_COMPAT=( python3_{11..13} )
 
 TEST_OIIO_IMAGE_COMMIT="75099275c73a6937d40c69f9e14a006aa49fa201"
-TEST_OEXR_IMAGE_COMMIT="d45a2d5a890d6963b94479c7a644440068c37dd2"
+TEST_OEXR_IMAGE_COMMIT="e38ffb0790f62f05a6f083a6fa4cac150b3b7452"
 inherit cuda cmake flag-o-matic python-single-r1
 
 DESCRIPTION="A library for reading and writing images"
@@ -124,9 +124,9 @@ DOCS=(
 )
 
 PATCHES=(
-	"${FILESDIR}/${PN}-2.5.8.0-fix-tests.patch"
 	"${FILESDIR}/${PN}-2.5.12.0-heif-find-fix.patch"
 	"${FILESDIR}/${PN}-2.5.18.0-tests-optional.patch"
+	"${FILESDIR}/${PN}-3.0.7.0-fix-tests.patch"
 )
 
 pkg_setup() {

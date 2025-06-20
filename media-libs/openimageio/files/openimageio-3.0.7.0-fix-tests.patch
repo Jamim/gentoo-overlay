@@ -45,17 +45,15 @@ diff --git a/testsuite/texture-interp-closest/run.py b/testsuite/texture-interp-
 index e226f44..c2c471c 100755
 --- a/testsuite/texture-interp-closest/run.py
 +++ b/testsuite/texture-interp-closest/run.py
-@@ -7,8 +7,8 @@
+@@ -7,7 +7,7 @@
 
  # Adjust error thresholds a tad to account for platform-to-platform variation
  # in some math precision.
 -hardfail = 0.032
--failpercent = 0.002
 +hardfail = 0.12
-+failpercent = 0.015
+ failpercent = 0.02
+ allowfailures = 1
 
- command = testtex_command ("../common/textures/grid.tx",
-                            extraargs = "-interpmode 0  -d uint8 -o out.tif")
 diff --git a/testsuite/texture-levels-stochaniso/run.py b/testsuite/texture-levels-stochaniso/run.py
 index 92272c4..7259564 100755
 --- a/testsuite/texture-levels-stochaniso/run.py
