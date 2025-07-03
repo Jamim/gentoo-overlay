@@ -17,7 +17,7 @@ S="${WORKDIR}/${MY_P}"
 LICENSE="BSD GPL-3-with-openssl-exception LGPL-2+"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~loong ~riscv"
-IUSE="dbus enchant +fonts +jemalloc +libdispatch screencast wayland webkit +X"
+IUSE="dbus enchant +fonts +libdispatch screencast wayland webkit +X"
 
 CDEPEND="
 	!net-im/telegram-desktop-bin
@@ -44,7 +44,6 @@ CDEPEND="
 	kde-frameworks/kcoreaddons:6
 	!enchant? ( >=app-text/hunspell-1.7:= )
 	enchant? ( app-text/enchant:= )
-	jemalloc? ( dev-libs/jemalloc:= )
 	libdispatch? ( dev-libs/libdispatch )
 	webkit? ( wayland? (
 		>=dev-qt/qtdeclarative-6.5:6
@@ -75,7 +74,6 @@ BDEPEND="
 "
 
 PATCHES=(
-	"${FILESDIR}"/tdesktop-4.2.4-jemalloc-only-telegram-r1.patch
 	"${FILESDIR}"/tdesktop-5.2.2-qt6-no-wayland.patch
 	"${FILESDIR}"/tdesktop-5.2.2-libdispatch.patch
 	"${FILESDIR}"/tdesktop-5.7.2-cstring.patch
@@ -165,7 +163,6 @@ src_configure() {
 		-DDESKTOP_APP_USE_LIBDISPATCH=$(usex libdispatch)
 		-DDESKTOP_APP_DISABLE_X11_INTEGRATION=$(usex !X)
 		-DDESKTOP_APP_DISABLE_WAYLAND_INTEGRATION=$(usex !wayland)
-		-DDESKTOP_APP_DISABLE_JEMALLOC=$(usex !jemalloc)
 		## Enables enchant and disables hunspell
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
 		## Use system fonts instead of bundled ones
@@ -202,13 +199,6 @@ pkg_postinst() {
 	xdg_pkg_postinst
 	if ! use X && ! use screencast; then
 		ewarn "both the 'X' and 'screencast' USE flags are disabled, screen sharing won't work!"
-		ewarn
-	fi
-	if ! use jemalloc && use elibc_glibc; then
-		# https://github.com/telegramdesktop/tdesktop/issues/16084
-		# https://github.com/desktop-app/cmake_helpers/pull/91#issuecomment-881788003
-		ewarn "Disabling USE=jemalloc on glibc systems may cause very high RAM usage!"
-		ewarn "Do NOT report issues about RAM usage without enabling this flag first."
 		ewarn
 	fi
 	if ! use libdispatch; then
