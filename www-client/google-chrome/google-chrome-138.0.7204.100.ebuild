@@ -24,9 +24,9 @@ S=${WORKDIR}
 
 LICENSE="google-chrome"
 SLOT="0"
-KEYWORDS="-* amd64"
+KEYWORDS="-* ~amd64"
 
-IUSE="qt6 selinux"
+IUSE="X qt6 selinux"
 
 RESTRICT="bindist mirror strip"
 
@@ -48,8 +48,8 @@ RDEPEND="
 	x11-libs/cairo
 	x11-libs/gdk-pixbuf:2
 	|| (
-		x11-libs/gtk+:3[X]
-		gui-libs/gtk:4[X]
+		x11-libs/gtk+:3[X?]
+		gui-libs/gtk:4[X?]
 	)
 	x11-libs/libdrm
 	>=x11-libs/libX11-1.5.0
