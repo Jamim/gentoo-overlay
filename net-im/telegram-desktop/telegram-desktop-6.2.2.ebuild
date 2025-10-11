@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{11..13} )
+PYTHON_COMPAT=( python3_{11..14} )
 
 inherit xdg cmake python-any-r1 optfeature toolchain-funcs flag-o-matic
 
@@ -39,7 +39,7 @@ CDEPEND="
 	media-libs/opus
 	media-libs/rnnoise
 	>=media-libs/tg_owt-0_pre20241202:=[screencast=,X=]
-	>=media-video/ffmpeg-4:=[opus,vpx]
+	>=media-video/ffmpeg-6:=[opus,vpx]
 	net-libs/tdlib:=[tde2e]
 	sys-libs/zlib:=[minizip]
 	kde-frameworks/kcoreaddons:6
