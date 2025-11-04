@@ -41,7 +41,7 @@ CDEPEND="
 	>=media-libs/tg_owt-0_pre20241202:=[screencast=,X=]
 	>=media-video/ffmpeg-6:=[opus,vpx]
 	net-libs/tdlib:=[tde2e]
-	sys-libs/zlib:=[minizip]
+	virtual/minizip:=
 	kde-frameworks/kcoreaddons:6
 	!enchant? ( >=app-text/hunspell-1.7:= )
 	enchant? ( app-text/enchant:= )
@@ -69,7 +69,7 @@ BDEPEND="
 	${PYTHON_DEPS}
 	>=dev-build/cmake-3.16
 	>=dev-cpp/cppgir-2.0_p20240315
-	dev-libs/gobject-introspection
+	>=dev-libs/gobject-introspection-1.82.0-r2
 	dev-util/gdbus-codegen
 	virtual/pkgconfig
 	wayland? ( dev-util/wayland-scanner )
