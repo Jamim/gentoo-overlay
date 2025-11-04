@@ -1,13 +1,14 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
+GENTOO_DEPEND_ON_PERL="no"
 QA_PKGCONFIG_VERSION=$(ver_cut 1-3)
-inherit autotools flag-o-matic perl-functions toolchain-funcs
+inherit autotools flag-o-matic perl-module toolchain-funcs
 
 DESCRIPTION="A collection of tools and libraries for many image formats"
-HOMEPAGE="https://imagemagick.org/"
+HOMEPAGE="https://imagemagick.org"
 
 if [[ ${PV} == 9999 ]] ; then
 	EGIT_REPO_URI="https://github.com/ImageMagick/ImageMagick.git"
@@ -17,7 +18,7 @@ else
 	MY_PV="$(ver_rs 3 '-')"
 	MY_P="ImageMagick-${MY_PV}"
 	SRC_URI="mirror://imagemagick/${MY_P}.tar.xz"
-	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~arm64-macos ~ppc-macos ~x64-macos ~x64-solaris"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~arm64-macos ~ppc-macos ~x64-macos ~x64-solaris"
 fi
 
 S="${WORKDIR}/${MY_P}"
@@ -26,7 +27,10 @@ LICENSE="imagemagick"
 # Please check this on bumps, SONAME is often not updated! Use abidiff on old/new.
 # If ABI is broken, change the bit after the '-'.
 SLOT="0/$(ver_cut 1-3)-18"
-IUSE="bzip2 corefonts +cxx djvu fftw fontconfig fpx graphviz hardened hdri heif jbig jpeg jpeg2k jpegxl lcms lqr lzma opencl openexr openmp pango perl +png postscript q32 q8 raw static-libs svg test tiff truetype webp wmf X xml zip zlib"
+IUSE="bzip2 corefonts +cxx djvu fftw fontconfig fpx graphviz hardened hdri heif"
+IUSE+=" jbig jpeg jpeg2k jpegxl lcms lqr lzma opencl openexr openmp pango perl ${GENTOO_PERL_USESTRING}"
+IUSE+=" +png postscript q32 q8 raw static-libs svg test tiff truetype webp wmf"
+IUSE+=" X xml zip zlib"
 
 REQUIRED_USE="
 	corefonts? ( truetype )
@@ -56,7 +60,10 @@ RDEPEND="
 	opencl? ( virtual/opencl )
 	openexr? ( media-libs/openexr:0= )
 	pango? ( x11-libs/pango )
-	perl? ( >=dev-lang/perl-5.8.8:= )
+	perl? (
+		${GENTOO_PERL_DEPSTRING}
+		>=dev-lang/perl-5.8.8:=
+	)
 	png? ( media-libs/libpng:= )
 	postscript? ( app-text/ghostscript-gpl:= )
 	raw? ( media-libs/libraw:= )
@@ -77,10 +84,10 @@ RDEPEND="
 		x11-libs/libXext
 		x11-libs/libXt
 	)
-	xml? ( dev-libs/libxml2 )
+	xml? ( dev-libs/libxml2:= )
 	lzma? ( app-arch/xz-utils )
 	zip? ( dev-libs/libzip:= )
-	zlib? ( sys-libs/zlib:= )
+	zlib? ( virtual/zlib:= )
 "
 DEPEND="
 	${RDEPEND}
@@ -106,8 +113,7 @@ src_prepare() {
 	#elibtoolize # for Darwin modules
 	eautoreconf
 
-	# For testsuite, see https://bugs.gentoo.org/show_bug.cgi?id=500580#c3
-	local ati_cards mesa_cards nvidia_cards render_cards
+	# For testsuite, see bug #500580#c3
 	shopt -s nullglob
 	for card in /dev/{{ati,dri}/card,nvidia,dri/renderD128}*; do
 		addpredict "${card}"
@@ -121,7 +127,12 @@ src_configure() {
 	use q8 && depth=8
 	use q32 && depth=32
 
+	use perl && perl_check_env
+
 	[[ ${CHOST} == *-solaris* ]] && append-ldflags -lnsl -lsocket
+
+	# Workaround for bug #941208 (gcc PR117100)
+	tc-is-gcc && [[ $(gcc-major-version) == 13 ]] && append-flags -fno-unswitch-loops
 
 	local myeconfargs=(
 		$(use_enable static-libs static)
@@ -133,12 +144,14 @@ src_configure() {
 		--with-quantum-depth=${depth}
 		$(use_with cxx magick-plus-plus)
 		$(use_with perl)
+		--with-perl-options='INSTALLDIRS=vendor'
 		--with-gs-font-dir="${EPREFIX}"/usr/share/fonts/urw-fonts
 		$(use_with bzip2 bzlib)
 		$(use_with X x)
 		$(use_with zip)
 		$(use_with zlib)
 		--without-autotrace
+		--with-uhdr
 		$(use_with postscript dps)
 		$(use_with djvu)
 		--with-dejavu-font-dir="${EPREFIX}"/usr/share/fonts/dejavu
@@ -176,18 +189,12 @@ src_configure() {
 		--with-security-policy=$(usex hardened limited open)
 	)
 
-	if use perl; then
-		perl_check_env
-		perl_set_version
-		local perl_options=(
-			INSTALLDIRS=vendor
-			INSTALLVENDORARCH="\"${VENDOR_ARCH}\""
-			INSTALLVENDORMAN3DIR="\"${EPREFIX}/usr/share/man/man3\""
-		)
-		myeconfargs+=( --with-perl-options="${perl_options[*]}" )
-	fi
-
 	CONFIG_SHELL="${BROOT}"/bin/bash econf "${myeconfargs[@]}"
+}
+
+src_compile() {
+	# Avoid perl-module_src_compile
+	default
 }
 
 src_test() {
@@ -221,8 +228,7 @@ src_install() {
 		DOCUMENTATION_PATH="${EPREFIX}"/usr/share/doc/${PF}/html \
 		install
 
-	rm -f "${ED}"/usr/share/doc/${PF}/html/LICENSE
-	dodoc AUTHORS.txt README.md
+	einstalldocs
 
 	if use perl; then
 		find "${ED}" -type f -name perllocal.pod -exec rm -f {} + || die
@@ -232,7 +238,6 @@ src_install() {
 	# .la files in parent are not needed, keep plugin .la files
 	find "${ED}"/usr/$(get_libdir)/ -maxdepth 1 -name "*.la" -delete || die
 
-	# not sure whether it's still necessary, please see
 	# https://github.com/gentoo/gentoo/pull/37716#discussion_r1696713348
 	find "${ED}" -name '*.la' -exec sed -i -e "/^dependency_libs/s:=.*:='':" {} + || die
 
