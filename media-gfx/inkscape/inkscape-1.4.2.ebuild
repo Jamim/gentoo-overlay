@@ -1,7 +1,10 @@
-# Copyright 1999-2024 Gentoo Authors
+# Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
+
+# Remember to check the release notes for a 'Important Changes for Packagers'
+# section, e.g. https://inkscape.org/doc/release_notes/1.4/Inkscape_1.4.html#Important_Changes_for_Packagers.
 
 PYTHON_COMPAT=( python3_{10..13} )
 PYTHON_REQ_USE="xml(+)"
@@ -16,8 +19,8 @@ if [[ ${PV} = 9999* ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://gitlab.com/inkscape/inkscape.git"
 else
-	SRC_URI="https://media.inkscape.org/dl/resources/file/${P}.tar.xz"
-	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
+	SRC_URI="https://media.inkscape.org/dl/resources/file/${MY_P}.tar.xz"
+	KEYWORDS="~alpha amd64 ~arm ~arm64 ~hppa ~loong ppc ppc64 ~riscv ~sparc x86"
 fi
 
 S="${WORKDIR}/${MY_P}"
@@ -26,7 +29,8 @@ LICENSE="GPL-2 LGPL-2.1"
 SLOT="0"
 IUSE="cdr dia exif graphicsmagick imagemagick inkjar jpeg openmp postscript readline sourceview spell svg2 test visio wpg X"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
-RESTRICT="!test? ( test )"
+# Lots of test failures which need investigating, bug #871621
+RESTRICT="!test? ( test ) test"
 
 BDEPEND="
 	dev-util/glib-utils
@@ -37,7 +41,7 @@ BDEPEND="
 COMMON_DEPEND="${PYTHON_DEPS}
 	>=app-text/poppler-0.57.0:=[cairo]
 	>=dev-cpp/cairomm-1.12:0
-	>=dev-cpp/glibmm-2.54.1:2
+	>=dev-cpp/glibmm-2.58:2
 	dev-cpp/gtkmm:3.0
 	>=dev-cpp/pangomm-2.40:1.4
 	>=dev-libs/boehm-gc-7.1:=
@@ -45,7 +49,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/double-conversion:=
 	>=dev-libs/glib-2.41
 	>=dev-libs/libsigc++-2.8:2
-	>=dev-libs/libxml2-2.7.4
+	>=dev-libs/libxml2-2.7.4:=
 	>=dev-libs/libxslt-1.1.25
 	dev-libs/popt
 	media-gfx/potrace
@@ -54,7 +58,6 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/freetype:2
 	media-libs/lcms:2
 	media-libs/libpng:0=
-	net-libs/libsoup:2.4
 	sci-libs/gsl:=
 	>=x11-libs/pango-1.44
 	x11-libs/gtk+:3[X?]
@@ -67,6 +70,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 		dev-python/lockfile[${PYTHON_USEDEP}]
 		dev-python/lxml[${PYTHON_USEDEP}]
 		dev-python/pillow[jpeg?,tiff,webp,${PYTHON_USEDEP}]
+		dev-python/tinycss2[${PYTHON_USEDEP}]
 		media-gfx/scour[${PYTHON_USEDEP}]
 	')
 	cdr? (
@@ -82,7 +86,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	jpeg? ( media-libs/libjpeg-turbo:= )
 	readline? ( sys-libs/readline:= )
 	sourceview? ( x11-libs/gtksourceview:4 )
-	spell? ( app-text/gspell )
+	spell? ( app-text/gspell:= )
 	visio? (
 		app-text/libwpg:0.3
 		dev-libs/librevenge
@@ -109,11 +113,7 @@ DEPEND="${COMMON_DEPEND}
 "
 
 PATCHES=(
-	"${FILESDIR}"/${P}-libxml2-2.12.patch
-	"${FILESDIR}"/${P}-poppler-24.03.patch
-	"${FILESDIR}"/${P}-poppler-24.05.patch # bug 931917
-	"${FILESDIR}"/${P}-cxx20.patch # bug 931917
-	"${FILESDIR}"/${P}-cxx20-2.patch # bug 933216
+        "${FILESDIR}"/${P}-poppler-25.{06,07,09,10}.patch # bugs 949531, 957137, 962278
 )
 
 pkg_pretend() {
@@ -131,10 +131,11 @@ src_unpack() {
 	else
 		default
 	fi
-	[[ -d "${S}" ]] || mv -v "${WORKDIR}/${P}_202"?-??-* "${S}" || die
+	[[ -d "${S}" ]] || mv -v "${WORKDIR}/${P/_/-}_202"?-??-* "${S}" || die
 }
 
 src_prepare() {
+	rm -vr src/3rdparty/2geom/tests/dependent-project || die # unused, causing bug #964016
 	cmake_src_prepare
 	sed -i "/install.*COPYING/d" CMakeScripts/ConfigCPack.cmake || die
 }
@@ -151,7 +152,6 @@ src_configure() {
 		-DENABLE_POPPLER=ON
 		-DENABLE_POPPLER_CAIRO=ON
 		-DWITH_PROFILING=OFF
-		-DWITH_INTERNAL_CAIRO=OFF
 		-DWITH_INTERNAL_2GEOM=ON
 		-DBUILD_TESTING=$(usex test)
 		-DWITH_LIBCDR=$(usex cdr)
@@ -175,17 +175,21 @@ src_configure() {
 
 src_test() {
 	CMAKE_SKIP_TESTS=(
+		# render_text*: needs patched Cairo / maybe upstream changes
+		# not yet in a release.
 		# test_lpe/test_lpe64: precision differences b/c of new GCC?
 		# cli_export-png-color-mode-gray-8_png_check_output: ditto?
-		cli_convert-text-paintorder_check_output
-		cli_export-png-color-mode-gray-8_png_check_output
-		cli_export-text-paintorder_check_output
-		cli_pdfinput-font-spacing_check_output
-		cli_pdfinput-font-style_check_output
+		render_test-use
+		render_test-glyph-y-pos
+		render_text-glyphs-combining
+		render_text-glyphs-vertical
+		render_test-rtl-vertical
 		test_lpe
 		test_lpe64
+		cli_export-png-color-mode-gray-8_png_check_output
 	)
 
+	# bug #871621
 	cmake_src_compile tests
 	cmake_src_test -j1
 }
@@ -202,7 +206,4 @@ src_install() {
 		python_fix_shebang "${ED}"/usr/share/${PN}/extensions
 		python_optimize "${ED}"/usr/share/${PN}/extensions
 	fi
-
-	# Empty directory causes sandbox issues, see bug #761915
-	rm -r "${ED}/usr/share/inkscape/fonts" || die "Failed to remove fonts directory."
 }
