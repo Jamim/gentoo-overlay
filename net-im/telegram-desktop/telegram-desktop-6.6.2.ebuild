@@ -68,7 +68,7 @@ DEPEND="${CDEPEND}
 BDEPEND="
 	${PYTHON_DEPS}
 	>=dev-build/cmake-3.16
-	>=dev-cpp/cppgir-2.0_p20240315
+	>=dev-cpp/cppgir-2.0_p20260226
 	>=dev-libs/gobject-introspection-1.82.0-r2
 	>=dev-util/gdbus-codegen-2.80.5-r1
 	virtual/pkgconfig
@@ -77,12 +77,12 @@ BDEPEND="
 # NOTE: dev-cpp/expected-lite used indirectly by a dev-cpp/cppgir header file
 
 PATCHES=(
-	"${FILESDIR}"/tdesktop-5.2.2-qt6-no-wayland.patch
+	"${FILESDIR}"/tdesktop-6.6.2-qt6-no-wayland.patch
 	"${FILESDIR}"/tdesktop-5.2.2-libdispatch.patch
 	"${FILESDIR}"/tdesktop-5.7.2-cstring.patch
 	"${FILESDIR}"/tdesktop-5.8.3-cstdint.patch
 	"${FILESDIR}"/tdesktop-5.14.3-system-cppgir.patch
-	"${FILESDIR}"/tdesktop-6.3.2-loosen-minizip.patch
+	"${FILESDIR}"/tdesktop-6.5.1-zlib-1.3.2.patch
 )
 
 pkg_pretend() {
@@ -225,10 +225,15 @@ src_configure() {
 }
 
 src_compile() {
-	# There's a bug where sometimes, it will rebuild/relink during src_install
-	# Make sure that happens here, instead.
+	# The cppgir program causes the gen/gio/_types.hpp file to be updated.
+	# Since this program can usually be invoked anywhere in the build process,
+	# running it *after* some files depending on the header have been compiled
+	# causes Telegram to be linked again during src_install().  This is a slow
+	# process (especially with LTO), so we try to avoid it by running all
+	# cppgir targets upfront.
+	cmake_build $("${CMAKE_BINARY}" --build "${BUILD_DIR}" -t help | sed -n '/^[^/]*_cppgir:/s/:.*//p')
 	cmake_build
-	cmake_build
+	cmake_build  # Just in case, should say "no work to do"
 }
 
 pkg_postinst() {
