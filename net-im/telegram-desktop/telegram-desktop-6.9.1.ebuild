@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{11..14} )
+PYTHON_COMPAT=( python3_{12..15} )
 
 inherit xdg cmake python-any-r1 optfeature flag-o-matic
 
@@ -22,6 +22,7 @@ IUSE="dbus enchant +fonts +libdispatch screencast wayland webkit +X"
 CDEPEND="
 	!net-im/telegram-desktop-bin
 	app-arch/lz4:=
+	>=app-text/cmark-gfm-0.29.0.13-r2:=
 	dev-cpp/abseil-cpp:=
 	dev-cpp/ada:=
 	dev-cpp/cld3:=
@@ -77,12 +78,11 @@ BDEPEND="
 # NOTE: dev-cpp/expected-lite used indirectly by a dev-cpp/cppgir header file
 
 PATCHES=(
-	"${FILESDIR}"/tdesktop-6.6.2-qt6-no-wayland.patch
+	"${FILESDIR}"/tdesktop-6.9.1-qt6-no-wayland.patch
 	"${FILESDIR}"/tdesktop-5.2.2-libdispatch.patch
 	"${FILESDIR}"/tdesktop-5.7.2-cstring.patch
 	"${FILESDIR}"/tdesktop-5.8.3-cstdint.patch
 	"${FILESDIR}"/tdesktop-5.14.3-system-cppgir.patch
-	"${FILESDIR}"/tdesktop-6.5.1-zlib-1.3.2.patch
 )
 
 pkg_pretend() {
@@ -99,6 +99,7 @@ pkg_pretend() {
 src_prepare() {
 	# Happily fail if libraries aren't found...
 	find -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) \
+		\! -path './cmake/external/minizip/CMakeLists.txt' \
 		\! -path './cmake/external/qt/package.cmake' \
 		-print0 | xargs -0 sed -i \
 		-e '/pkg_check_modules(/s/[^ ]*)/REQUIRED &/' \
@@ -118,6 +119,7 @@ src_prepare() {
 		libprisma  # Telegram-specific library, no stable releases
 		tgcalls  # Telegram-specific library, no stable releases
 		xdg-desktop-portal  # Only a few xml files are used with gdbus-codegen
+		MicroTeX  # Telegram-specific fork, no stable releases
 	)
 	for x in Telegram/ThirdParty/*; do
 		has "${x##*/}" "${keep[@]}" || rm -r "${x}" || die
