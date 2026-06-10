@@ -1,0 +1,178 @@
+https://github.com/github/cmark-gfm/pull/390
+
+From db763b8abafd7a3c4561f59a14af673d6e5f6953 Mon Sep 17 00:00:00 2001
+From: Daichi Yamamoto <dev@dyama.net>
+Date: Mon, 25 May 2026 11:01:54 +0900
+Subject: [PATCH 1/3] Set CMake minimum version to 4.0
+
+Source:
+  - https://gitweb.gentoo.org/repo/proj/guru.git/commit/app-text/cmark-gfm/files/cmake-minimum-required.patch?id=24b13f11
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a6a663c81..72b72e0df 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.0)
++cmake_minimum_required(VERSION 4.0)
+ project(cmark-gfm)
+ 
+ set(PROJECT_VERSION_MAJOR 0)
+
+From 5edf79faa64f99a1db6ff74e33a0876208e17ce6 Mon Sep 17 00:00:00 2001
+From: Aliaksei Urbanski <aliaksei.urbanski@gmail.com>
+Date: Wed, 10 Jun 2026 10:02:36 +0300
+Subject: [PATCH 2/3] Fix destinations for CMake files
+
+---
+ extensions/CMakeLists.txt | 5 ++++-
+ src/CMakeLists.txt        | 5 ++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/extensions/CMakeLists.txt b/extensions/CMakeLists.txt
+index e545b6d6f..887ddf29c 100644
+--- a/extensions/CMakeLists.txt
++++ b/extensions/CMakeLists.txt
+@@ -79,7 +79,10 @@ if (CMARK_SHARED OR CMARK_STATIC)
+   DESTINATION include
+   )
+ 
+-  install(EXPORT cmark-gfm-extensions DESTINATION lib${LIB_SUFFIX}/cmake-gfm-extensions)
++  install(
++    EXPORT cmark-gfm-extensions
++    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm-extensions"
++  )
+ endif()
+ 
+ # Feature tests
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 84dd2a037..cfb23d295 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -175,7 +175,10 @@ if(CMARK_SHARED OR CMARK_STATIC)
+     DESTINATION include
+     )
+ 
+-  install(EXPORT cmark-gfm DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
++  install(
++    EXPORT cmark-gfm
++    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm"
++  )
+ endif()
+ 
+ # Feature tests
+
+From 73feff469bc7c386d8df7ce29e5cb5b8e7d5b9d5 Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Wed, 10 Jun 2026 10:03:09 +0300
+Subject: [PATCH 3/3] Add config.cmake and config-version.cmake files
+
+These files are required in order to build Telegram Desktop.
+
+Co-authored-by: Aliaksei Urbanski <aliaksei.urbanski@gmail.com>
+Source: https://github.com/commonmark/cmark/commit/853cf7c9
+---
+ CMakeLists.txt                                |  1 +
+ extensions/CMakeLists.txt                     | 19 +++++++++++++++++++
+ .../cmark-gfm-extensions-config.cmake.in      |  4 ++++
+ src/CMakeLists.txt                            | 19 +++++++++++++++++++
+ src/cmark-gfm-config.cmake.in                 |  4 ++++
+ 5 files changed, 47 insertions(+)
+ create mode 100644 extensions/cmark-gfm-extensions-config.cmake.in
+ create mode 100644 src/cmark-gfm-config.cmake.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 72b72e0df..6b6c24b7d 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,6 +7,7 @@ set(PROJECT_VERSION_PATCH 0)
+ set(PROJECT_VERSION_GFM 13)
+ set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.gfm.${PROJECT_VERSION_GFM})
+ 
++include(CMakePackageConfigHelpers)
+ include("FindAsan.cmake")
+ include("CheckFileOffsetBits.cmake")
+ 
+diff --git a/extensions/CMakeLists.txt b/extensions/CMakeLists.txt
+index 887ddf29c..3875e1fc3 100644
+--- a/extensions/CMakeLists.txt
++++ b/extensions/CMakeLists.txt
+@@ -85,6 +85,25 @@ if (CMARK_SHARED OR CMARK_STATIC)
+   )
+ endif()
+ 
++# generate config and config-version files
++configure_package_config_file(
++  "cmark-gfm-extensions-config.cmake.in"
++  "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-extensions-config.cmake"
++  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm-extensions"
++)
++write_basic_package_version_file(
++  "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-extensions-config-version.cmake"
++  VERSION ${PROJECT_VERSION}
++  COMPATIBILITY SameMajorVersion
++)
++
++# install config and config-version files
++install(
++  FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-extensions-config.cmake"
++        "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-extensions-config-version.cmake"
++  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm-extensions"
++)
++
+ # Feature tests
+ include(CheckIncludeFile)
+ include(CheckCSourceCompiles)
+diff --git a/extensions/cmark-gfm-extensions-config.cmake.in b/extensions/cmark-gfm-extensions-config.cmake.in
+new file mode 100644
+index 000000000..6340b7e75
+--- /dev/null
++++ b/extensions/cmark-gfm-extensions-config.cmake.in
+@@ -0,0 +1,4 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/cmark-gfm-extensions.cmake")
++check_required_components("cmark-gfm-extensions")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index cfb23d295..153a62a66 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -181,6 +181,25 @@ if(CMARK_SHARED OR CMARK_STATIC)
+   )
+ endif()
+ 
++# generate config and config-version files
++configure_package_config_file(
++  "cmark-gfm-config.cmake.in"
++  "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-config.cmake"
++  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm"
++)
++write_basic_package_version_file(
++  "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-config-version.cmake"
++  VERSION ${PROJECT_VERSION}
++  COMPATIBILITY SameMajorVersion
++)
++
++# install config and config-version files
++install(
++  FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-config.cmake"
++        "${CMAKE_CURRENT_BINARY_DIR}/generated/cmark-gfm-config-version.cmake"
++  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmark-gfm"
++)
++
+ # Feature tests
+ include(CheckIncludeFile)
+ include(CheckCSourceCompiles)
+diff --git a/src/cmark-gfm-config.cmake.in b/src/cmark-gfm-config.cmake.in
+new file mode 100644
+index 000000000..7d33c17f6
+--- /dev/null
++++ b/src/cmark-gfm-config.cmake.in
+@@ -0,0 +1,4 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/cmark-gfm.cmake")
++check_required_components("cmark-gfm")

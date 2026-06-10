@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -15,14 +15,16 @@ S="${WORKDIR}/${PN}-${MYPV}"
 
 LICENSE="BSD-2"
 SLOT="0/0.29.0"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~loong"
 IUSE="test"
 
 DEPEND="test? ( ${PYTHON_DEPS} )"
 
 RESTRICT="!test? ( test )"
 
-PATCHES=( "${FILESDIR}"/cmake-minimum-required.patch )
+PATCHES=(
+	"${FILESDIR}"/${PN}-cmake.patch
+)
 
 pkg_setup() {
 	use test && python-any-r1_pkg_setup
@@ -34,6 +36,7 @@ src_configure() {
 		-DCMARK_SHARED=ON
 		-DCMARK_STATIC=OFF
 		-DCMARK_TESTS="$(usex test)"
+		-DCMAKE_INSTALL_LIBDIR="${EPREFIX}/usr/$(get_libdir)/cmake"
 	)
 	cmake_src_configure
 }
