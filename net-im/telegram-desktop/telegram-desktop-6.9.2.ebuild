@@ -17,7 +17,7 @@ S="${WORKDIR}/${MY_P}"
 LICENSE="BSD GPL-3-with-openssl-exception LGPL-2+"
 SLOT="0"
 KEYWORDS="~amd64 ~loong"
-IUSE="dbus enchant +fonts +libdispatch screencast wayland webkit +X"
+IUSE="dbus enchant +fonts screencast wayland webkit +X"
 
 CDEPEND="
 	!net-im/telegram-desktop-bin
@@ -46,7 +46,6 @@ CDEPEND="
 	kde-frameworks/kcoreaddons:6
 	!enchant? ( >=app-text/hunspell-1.7:= )
 	enchant? ( app-text/enchant:= )
-	libdispatch? ( dev-libs/libdispatch )
 	webkit? ( wayland? (
 		>=dev-qt/qtdeclarative-6.5:6
 		>=dev-qt/qtwayland-6.5:6[compositor(+),qml]
@@ -78,8 +77,8 @@ BDEPEND="
 # NOTE: dev-cpp/expected-lite used indirectly by a dev-cpp/cppgir header file
 
 PATCHES=(
-	"${FILESDIR}"/tdesktop-6.9.1-qt6-no-wayland.patch
-	"${FILESDIR}"/tdesktop-5.2.2-libdispatch.patch
+	"${FILESDIR}"/tdesktop-6.9.2-no-dispatch.patch
+	"${FILESDIR}"/tdesktop-6.9.2-qt6-no-wayland.patch
 	"${FILESDIR}"/tdesktop-5.7.2-cstring.patch
 	"${FILESDIR}"/tdesktop-5.8.3-cstdint.patch
 	"${FILESDIR}"/tdesktop-5.14.3-system-cppgir.patch
@@ -100,6 +99,7 @@ src_prepare() {
 	# Happily fail if libraries aren't found...
 	find -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) \
 		\! -path './cmake/external/minizip/CMakeLists.txt' \
+		\! -path './cmake/external/tmc/CMakeLists.txt' \
 		\! -path './cmake/external/qt/package.cmake' \
 		-print0 | xargs -0 sed -i \
 		-e '/pkg_check_modules(/s/[^ ]*)/REQUIRED &/' \
@@ -120,6 +120,7 @@ src_prepare() {
 		tgcalls  # Telegram-specific library, no stable releases
 		xdg-desktop-portal  # Only a few xml files are used with gdbus-codegen
 		MicroTeX  # Telegram-specific fork, no stable releases
+		TooManyCooks  # TODO: consider packaging
 	)
 	for x in Telegram/ThirdParty/*; do
 		has "${x##*/}" "${keep[@]}" || rm -r "${x}" || die
@@ -163,9 +164,6 @@ src_configure() {
 	# See https://bugs.gentoo.org/866055
 	append-cppflags -DNDEBUG
 
-	# https://github.com/telegramdesktop/tdesktop/issues/17437#issuecomment-1001160398
-	use !libdispatch && append-cppflags -DCRL_FORCE_QT
-
 	local no_webkit_wayland=$(use webkit && use wayland && echo no || echo yes)
 	local use_webkit_wayland=$(use webkit && use wayland && echo yes || echo no)
 	local mycmakeargs=(
@@ -196,8 +194,6 @@ src_configure() {
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
 		## Use system fonts instead of bundled ones
 		-DDESKTOP_APP_USE_PACKAGED_FONTS=$(usex !fonts)
-		## See tdesktop-*-libdispatch.patch
-		-DDESKTOP_APP_USE_LIBDISPATCH=$(usex libdispatch)
 	)
 
 	if [[ -n ${MY_TDESKTOP_API_ID} && -n ${MY_TDESKTOP_API_HASH} ]]; then
@@ -242,12 +238,6 @@ pkg_postinst() {
 	xdg_pkg_postinst
 	if ! use X && ! use screencast; then
 		ewarn "both the 'X' and 'screencast' USE flags are disabled, screen sharing won't work!"
-		ewarn
-	fi
-	if ! use libdispatch; then
-		ewarn "Disabling USE=libdispatch may cause performance degradation"
-		ewarn "due to fallback to poor QThreadPool! Please see"
-		ewarn "https://github.com/telegramdesktop/tdesktop/wiki/The-Packaged-Building-Mode"
 		ewarn
 	fi
 	optfeature_header
