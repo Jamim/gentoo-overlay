@@ -6,7 +6,7 @@ From: Aliaksei Urbanski <aliaksei.urbanski@gmail.com>
 Date: Fri, 12 Jun 2026 14:25:13 +0300
 Subject: [PATCH] Disable libdispatch support
 
-Telegram Desktop 6.9.2 build fails in case libdispatch is installed.
+Telegram Desktop 6.9.3 build fails in case libdispatch is installed.
 Removing #define CRL_USE_DISPATCH fixes that.
 ---
  crl/common/crl_common_config.h | 15 +--------------

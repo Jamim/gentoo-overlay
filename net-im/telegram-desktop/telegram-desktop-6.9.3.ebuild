@@ -77,8 +77,8 @@ BDEPEND="
 # NOTE: dev-cpp/expected-lite used indirectly by a dev-cpp/cppgir header file
 
 PATCHES=(
-	"${FILESDIR}"/tdesktop-6.9.2-no-dispatch.patch
-	"${FILESDIR}"/tdesktop-6.9.2-qt6-no-wayland.patch
+	"${FILESDIR}"/tdesktop-6.9.3-no-dispatch.patch
+	"${FILESDIR}"/tdesktop-6.9.3-qt6-no-wayland.patch
 	"${FILESDIR}"/tdesktop-5.7.2-cstring.patch
 	"${FILESDIR}"/tdesktop-5.8.3-cstdint.patch
 	"${FILESDIR}"/tdesktop-5.14.3-system-cppgir.patch
