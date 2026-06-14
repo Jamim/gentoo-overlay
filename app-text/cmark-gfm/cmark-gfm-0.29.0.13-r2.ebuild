@@ -36,7 +36,6 @@ src_configure() {
 		-DCMARK_SHARED=ON
 		-DCMARK_STATIC=OFF
 		-DCMARK_TESTS="$(usex test)"
-		-DCMAKE_INSTALL_LIBDIR="${EPREFIX}/usr/$(get_libdir)/cmake"
 	)
 	cmake_src_configure
 }
